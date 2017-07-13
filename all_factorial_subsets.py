@@ -1,10 +1,12 @@
 import itertools #Used for calculating Permutations
 import math 
 import time #timing commands
+import multiprocessing #used for processing subsets faster
+import concurrent.futures #used for multiprocessing
 
 
 '''
-Currently unused; used to see if a set is closed under addition modulo mod
+Unneccesary; showing you get the entire set back is sufficient; used to see if a set is closed under addition modulo mod
 '''
 def is_closed(l,mod):
 	prod_list = list(itertools.product(l,l))
@@ -15,6 +17,55 @@ def is_closed(l,mod):
 
 	return True
 
+#Used to verify good subsets
+def check_subsets(subset, n):
+	running_sum = 0
+	already_seen_nums = []
+	if subset[0] == n/2: #if the first element in the ordering is n/2, we know the ordering is invalid, so skip it
+		return False
+	for i in subset:
+		running_sum+=i
+		running_sum%=n
+		if running_sum in already_seen_nums or running_sum == 0:
+			return False
+		else:
+			already_seen_nums.append(running_sum)
+	return True
+
+#used to run through all possible subsets which would constitute the beginning of orderings
+def subset_processing(size):
+	gsf = open("good_subsets/"+str(size)+"subsets","w")
+	subsets = set(map(lambda x: x[:int(size/2)],itertools.islice(itertools.permutations(range(1,size)),0,None,math.factorial(int(size/2)-1)))) #get the half-sized subsets for verification
+	#print subsets
+	
+	with concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+		good_subsets = []
+		future_results = {executor.submit(check_subsets,subset,size): subset for subset in subsets}
+		for future in concurrent.futures.as_completed(future_results):
+				subset = future_results[future]
+				try:
+					if future.result():
+						good_subsets.append(subset)
+						gsf.write(str(subset)+"\n")
+						gsf.flush()
+				except Exception as e:
+					print e
+
+		# for subset in subsets:
+		# 	#print "Checking ", subset
+		# 	if check_subsets(subset, size):
+		# 		good_subsets.append(subset)
+		# 		gsf.write(str(subset) + "\n")
+		# 	#	print "Pass"
+		# for s in good_subsets:
+		# 	gsf.write(str(s)+"\n")
+
+	print "Original list: ", len(subsets), "good list: ", len(good_subsets)
+	gsf.close()
+	return	
+
+
+#Beginning of Program
 method = raw_input("which method (a|b): ") #determine the method of calculation; method a calculates all Z/nZ for n up to the provided value. method b only calculates Z/nZ for the provided value
 max_n = int(input("Enter the largest value for n: ")) #the value for n in Z/nZ
 
@@ -39,6 +90,11 @@ for n in iset:#for each modular group between Z/14Z and Z/16Z
 	if n%2==1: #we know that if n is odd, no ordering will reproduce the whole set
 		continue
 
+	if __import__("os").path.exists("good_subsets/"+str(n)+"subsets"):
+		#Load the file if it exists, otherwise create it
+	else:
+		subset_processing(n)
+		#Load the now made file here
 	results_f.write("##############################\r\nZ/"+str(n)+"Z\r\n")#write the header for each group
 	group = range(n)#create the group (0,1,...i-1)
 
