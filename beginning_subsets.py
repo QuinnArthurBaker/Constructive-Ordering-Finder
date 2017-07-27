@@ -3,18 +3,7 @@ import itertools
 import time
 import concurrent.futures
 import math
-def check_subsets(subset, n):
-	running_sum = 0
-	already_seen_nums = []
-	for i in subset:
-		running_sum+=i
-		running_sum%=n
-		if running_sum in already_seen_nums or running_sum == 0:
-		#	print "Fail: list seen: ", already_seen_nums
-			return False
-		else:
-			already_seen_nums.append(running_sum)
-	return True
+
 
 
 def main(size):

@@ -66,23 +66,34 @@ def subset_processing(size):
 
 
 #Beginning of Program
-method = raw_input("which method (a|b): ") #determine the method of calculation; method a calculates all Z/nZ for n up to the provided value. method b only calculates Z/nZ for the provided value
+method = raw_input("which method (a|b|c): ") #determine the method of calculation; method a calculates all Z/nZ for n up to the provided value. method b only calculates Z/nZ for the provided value
 max_n = int(input("Enter the largest value for n: ")) #the value for n in Z/nZ
+subset_check = raw_input("use known subsets? (y|n): ") 
+
+use_subsets = True
+if subset_check == 'n':
+	use_subsets = False
 
 #open the files for writing
 
 sizes_f = None
 results_f = None
-
+results_headless_f = None 
 iset = [] # the list which holds the values for n to iterate through
 if method == 'a':
-	sizes_f = open("sizes/sizes" + str(max_n) + "set","a")
-	results_f = open("results/results" + str(max_n) + "set","a")
+	sizes_f = open("sizes/sizes" + str(max_n) + "set","w")
+	results_f = open("results/results" + str(max_n) + "set","w")
 	iset = range(2,max_n+1)
-else:
-	sizes_f = open("sizes/sizes" + str(max_n) + "Sset","a")
-	results_f = open("results/results" + str(max_n) + "Sset","a")
+elif method == 'b':
+	sizes_f = open("sizes/sizes" + str(max_n) + "Sset","w")
+	results_f = open("results/results" + str(max_n) + "Sset","w")
+	results_headless_f = open("results/results" + str(max_n) + "Sset_headless", "w")
 	iset = range(max_n,max_n+1)
+elif method == 'c':
+	sizes_f = open("/dev/null","w")
+	results_f = open("/dev/null","w")
+	results_headless_f = open("/dev/null","w")
+	iset = range(max_n, max_n+1)
 
 before = int(time.time()) #get the initial timing
 for n in iset:#for each modular group between Z/14Z and Z/16Z
@@ -90,11 +101,16 @@ for n in iset:#for each modular group between Z/14Z and Z/16Z
 	if n%2==1: #we know that if n is odd, no ordering will reproduce the whole set
 		continue
 
-	if __import__("os").path.exists("good_subsets/"+str(n)+"subsets"):
+	if not __import__("os").path.exists("good_subsets/"+str(n)+"subsets"):
 		#Load the file if it exists, otherwise create it
-	else:
+		print "Creating subset list"
 		subset_processing(n)
-		#Load the now made file here
+	#Load the now made file here
+	subsets_file = open("good_subsets/" + str(n) + "subsets")
+	subset_collection = set()
+	for line in subsets_file:
+		exec("tup = " + line)
+		subset_collection.add(tup)
 	results_f.write("##############################\r\nZ/"+str(n)+"Z\r\n")#write the header for each group
 	group = range(n)#create the group (0,1,...i-1)
 
@@ -109,13 +125,19 @@ for n in iset:#for each modular group between Z/14Z and Z/16Z
 		if perm[0] != 0: #We know that if 0 is not the least element in the group, no ordering will reproduce the entire set
 			continue
 
-
+		if use_subsets:
+			if perm[1:int(n/2)+1] not in subset_collection: #ensure that the beginning of potential permutations match the beginnings of known valid permutation beginnings
+				continue
 		for item in perm: #for each number in the permutation
 			tot += item
-			if tot%len(group) in factorial_list: #if the element is already in the list, we know that the full set cannot be reproduced, so stop calcuating this ordering
+			if tot%len(group) in factorial_list or tot%n==0 or tot%n==n/2: #if the element is already in the list, we know that the full set cannot be reproduced, so stop calcuating this ordering
 				break
 			else:
 				factorial_list.append(tot%len(group))#append each factorial to the factorial_list
+		
+			
+
+
 
 		factorial_set = set(factorial_list) #create a set of the factorial_list, removing duplicates
 		#Subgroup stuff
@@ -132,12 +154,14 @@ for n in iset:#for each modular group between Z/14Z and Z/16Z
 		if factorial_set == set(range(n)):
 			fact_set_count += 1
 			results_f.write(str(perm) + "\r\n")
+			results_headless_f.write(str(perm) + "\r\n")
 
 
 
 
 
 		results_f.flush()#push the results to the results file
+		results_headless_f.flush()
 					
 	#at the end of each group 
 	sizes_f.write(str(n)+" "+str(fact_set_count)+" "+str(math.factorial(n))+"\r\n") #write the group number, the number of factorial sets, and i! to the sizes file
@@ -153,4 +177,5 @@ print after-before
 	
 sizes_f.close()
 results_f.close()
+results_headless_f.close()
 	
