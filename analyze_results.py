@@ -34,7 +34,7 @@ for i in range(1,n):
 	num_counts = [0]*n
 	for tup in tup_list:
 		num_counts[tup[i]] += 1
-	print "Position",i,": ", num_counts1
+	print "Position",i,": ", num_counts
 
 #Check size 2 tuples #all size 2 tuples not found in the valid permutations add to either n/2 or 0 mod n.
 '''tup_list = []
