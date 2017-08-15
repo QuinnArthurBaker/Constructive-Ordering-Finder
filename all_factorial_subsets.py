@@ -116,30 +116,36 @@ group = range(n)#create the group (0,1,...i-1)
 fact_set_count = 0 #initialize variable to count factorial sets which are subgroups
 iter_obj = itertools.permutations(group)#create the iterable which contains all permutations of the group to create all the orderings for the factorial sets
 
-reverse_lists = []
+reverse_lists = set()
 for perm in iter_obj:#for each ordering
 	tot = 0#initialize the factorial variable
-	factorial_list = [] #create the list to append each factorial result
-
+	factorial_set = set() #create the list to append each factorial result
+	factorial_list = []
 	if perm[0] != 0: #We know that if 0 is not the least element in the group, no ordering will reproduce the entire set
 		continue
 	if perm[1]>(n/2)-1: #if the first non-zero element of the ordering is n/2 or greater, we already know the total number of orderings, as all orderings found have a negative symmetry; if (0, g_1, g_2, ...) is a valid ordering, then (0, n-g_1, n-g_2, ...) or (0, -g_1, -g_2, ...) is also a valid ordering
 		fact_set_count*=2
 		break
+	if perm[1:] in reverse_lists:
+		continue
 	if use_subsets:
 		if perm[1:int(n/2)+1] not in subset_collection: #ensure that the beginning of potential permutations match the beginnings of known valid permutation beginnings
 			continue
 	for item in perm: #for each number in the permutation
 		tot += item
-		if tot%len(group) in factorial_list: #if the element is already in the list, we know that the full set cannot be reproduced, so stop calcuating this ordering
+		tot_mod = tot%n
+		if tot_mod in factorial_set: #if the element is already in the list, we know that the full set cannot be reproduced, so stop calcuating this ordering
 			#print "breaking at total:", tot, tot%len(group)
 			break
 		else:
-			factorial_list.append(tot%len(group))#append each factorial to the factorial_list
+			factorial_set.add(tot_mod)#append each factorial to the factorial_list
+			factorial_list.append(tot_mod)
 
-	factorial_set = set(factorial_list) #create a set of the factorial_list, removing duplicates
 	if factorial_set == set(range(n)):
 		fact_set_count += 1
+		factorial_tuple = tuple(factorial_list)
+		reverse_lists.add(factorial_tuple[1:][::-1])
+		print factorial_list
 		#results_f.write(str(perm) + "\r\n")
 		#results_headless_f.write(str(perm) + "\r\n")
 
