@@ -1,4 +1,4 @@
 compile:
-	clang++ -o fact_sub all_factorial_subsets.cpp
+	clang++ -std=c++11 -o fact_sub all_factorial_subsets.cpp
 run:
-	clang++ -o fact_sub all_factorial_subsets.cpp; ./fact_sub
+	clang++ -std=c++11 -o fact_sub all_factorial_subsets.cpp && ./fact_sub
