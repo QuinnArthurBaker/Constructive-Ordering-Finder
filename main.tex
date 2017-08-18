@@ -168,6 +168,13 @@ For even $n$, $\frac{n}{2}$ cannot be the second smallest element.
 \begin{proof}
 If $\frac{n}{2}$ is the second least element, then $\frac{n}{2}! = 0 + \frac{n}{2} = \frac{n}{2}$. However, we know by Lemma 2 that the factorial of the greatest element of $\ZnZ$ is $\frac{n}{2}$. Thus, if the second least element is $\frac{n}{2}$, then $\frac{n}{2}$ is duplicated, so $\FZ \neq \ZnZ$.
 \end{proof}
+\begin{lemma}
+If $o_1 = (0, g_1, g_2, \ldots)$ is a valid ordering, $0<g_1,g_2<\frac{n}{2}$, then $o_2 = (0,g_2, g_1, \ldots)$ is not a valid ordering
+\end{lemma}
+\begin{proof}
+The first few elements of $F_{o_1}(\ZnZ)$ are $\{0,g_1!, g_2!\ldots\} = \{0,g_1,g_1+g_2\ldots\}$. When the positions of $g_2$ and $g_1$ are interchanged in the ordering, resulting in $F_{o_2}(\ZnZ)$, the factorial set becomes $\{0,g_2!,g_1!,\ldots\} = \{0,g_2,g_1+g_2,\ldots\}$. As the rest of the ordering is unchanged, and since $g_2!$ in $o_1$ equals $g_1!$ in $o_2$, the only difference is $g_2$ in $F_{o_2}(\ZnZ)$. Since we know $o_1$ is a valid ordering, we know $F_{o_1}(\ZnZ)$ must equal $\ZnZ$. Therefore, $g_2$ must occur somewhere in $F_{o_1}(\ZnZ)$. Therefore, since $F_{o_1}(\ZnZ)$ equals $F_{o_2}(\ZnZ)$ outside of $g_2$ at the beginning of $F_{o_2}(\ZnZ)$, $g_2$ must also occur in the same position as it does in $F_{o_1}(\ZnZ)$. Therefore, $g_2$ repeats in $F_{o_2}(\ZnZ)$, and therefore cannot be a valid ordering.
+\end{proof}
+
 
 Furthermore, experimental evidence sheds more light on restrictions. Table 3 shows the result of frequency analysis performed on valid orderings of $\ZnZ$
 
@@ -194,13 +201,19 @@ Furthermore, experimental evidence sheds more light on restrictions. Table 3 sho
 \end{center}
 
 From this table, we see that for any value $i$, $0<i<n$, there are the same number of $i$'s and $(12-i)$'s in the $i$th and $(n-i)$th position, respectively. This symmetry allows us to make the following two observations:
-\begin{claim}
+\begin{lemma}
 If $(0,g_1,g_2,\ldots,g_n)$ is a valid ordering, then its inverse, $(0, n-g_1, n-g_2, \ldots, n-g_n)$ is also a valid ordering
-\end{claim}
-\begin{claim}
+\end{lemma}
+\begin{proof}
+The inverse of an element $g_i$, $n-g_i$, can also be written as $-g_i\pmod{n}$. Then, -$g_i! = -(g_i + g_{i-1} + g_{i-2} + \ldots + g_1)$. Thus the original factorial subset is reproduced, but negated. 
+\end{proof}
+\begin{lemma}
 If $(0, g_1, g_2, \ldots, g_n)$ is a valid ordering, then $(0, g_n, g_{n-1}, g_{n-2}, \ldots, g_1)$ is also a valid ordering.
-\end{claim}
-These two observations together reduce runtime by an upper factor of 4.
+\end{lemma}
+\begin{proof}
+Let $o_1 = (0,g_1, g_2, \ldots, \g_{n-1})$ and $o_2 = (0, g_{n-1}, g_{n-2}, \ldots, g_1)$. Then, $g_1!_{o_2}$ = $\frac{n}{2} = \frac{n}{2} - 0!_{o_1}$. Likewise, $g_2!_{o_2} = \frac{n}{2}-g_1!_{o_1}$. In general, $g_i!_{o_2} = \frac{n}{2} - g_{i-1}!_{o_1}$. Thus, the original factorial subset is reconstructed from this definition, negated and shifted by $\frac{n}{2}$.  
+\end{proof}
+%These two observations together reduce runtime by an upper factor of 4.
 
 \section{Description of the Algorithm}
 
