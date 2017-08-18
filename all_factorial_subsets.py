@@ -145,7 +145,7 @@ for perm in iter_obj:#for each ordering
 		fact_set_count += 1
 		factorial_tuple = tuple(factorial_list)
 		reverse_lists.add(factorial_tuple[1:][::-1])
-		print factorial_list
+		
 		#results_f.write(str(perm) + "\r\n")
 		#results_headless_f.write(str(perm) + "\r\n")
 
