@@ -124,8 +124,9 @@ for perm in iter_obj:#for each ordering
 	if perm[0] != 0: #We know that if 0 is not the least element in the group, no ordering will reproduce the entire set
 		continue
 	if perm[1]>(n/2)-1: #if the first non-zero element of the ordering is n/2 or greater, we already know the total number of orderings, as all orderings found have a negative symmetry; if (0, g_1, g_2, ...) is a valid ordering, then (0, n-g_1, n-g_2, ...) or (0, -g_1, -g_2, ...) is also a valid ordering
-		fact_set_count*=2
-		break
+		#fact_set_count*=2
+		#break
+		pass
 	if perm[1:] in reverse_lists:
 		continue
 	if use_subsets:
@@ -142,6 +143,7 @@ for perm in iter_obj:#for each ordering
 			factorial_list.append(tot_mod)
 
 	if factorial_set == set(range(n)):
+		print perm
 		fact_set_count += 1
 		factorial_tuple = tuple(factorial_list)
 		reverse_lists.add(factorial_tuple[1:][::-1])
