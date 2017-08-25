@@ -53,6 +53,18 @@ We define the factorial of $g_k$, $g_k! = \bigoplus_{i=0}^{k} g_i = g_0 \oplus g
 Given a group $G$ with some total ordering $\preceq$, we define the \textit{factorial subset} of $G$, denoted $F_\preceq(G)$, as $\{g! | g \in G\}$. In other words, the factorial subset of a group is the set of the factorials of each of that group's elements. If $F_\preceq(G)$ is a subgroup of $G$, then we say it is a \textit{factorial subgroup} of $G$. 
 \end{definition}
 
+
+The first property we are going to discuss is the following lemma, which is useful both in the immediate discussion and in the next sections as well
+
+\begin{lemma}\label{first_element_id} Let $G$ be a finite group and $\preceq$ be any total ordering on $G$. If $F_\preceq(G) = G$ then the smallest element under $\preceq$ must be the identity.
+\end{lemma}
+
+\begin{proof} This proof is by contradiction. If the identity, denoted $e$, were not the first element under the ordering $\preceq$  then there exists an element $g\in G$ immediately preceding $e$ in the ordering. Then clearly $g!=e!$, so there will be fewer than $|G|$ elements in $F_\preceq(G)$ so they cannot possibly be equal.
+
+\end{proof}
+
+
+
 \textbf{Example:} The Klein 4-group is a small, common group suitable for demonstrating the concepts established above. The Klein 4-group is defined as $\{e,a,b,c\}$, where $e$ is the identity, $a^2 = b^2 = c^2 = e$, $ab = c$, $ac = b$, and
 $bc = a$. Define $\preceq$ such that $e\preceq a \preceq b \preceq c$. Then, $e! = e$, $a! = ea = a$, $b! = eab$ = $ab = c$, and $c! = eabc$ = $cc$ = $e$. Then, the factorial subset of the Klein 4-group, $F_\preceq(V_4)$, is $\{e!,a!,b!,c!\}$, or $\{e,a,c\}$. Since the factorial subset has 3 elements and $V_4$ has 4, clearly the subset is not a subgroup of $V_4$. In fact:
 \begin{theorem}
@@ -61,10 +73,10 @@ For any ordering $\preceq$, $F_\preceq(V_4)$ is not a subgroup of $V_4$.
 \begin{proof}
 Let $x,y,z,w$ be distinct elements of $V_4$, where $x\preceq y \preceq z \preceq w$. Then, $F_\preceq(V_4) = \{x!,y!,z!,w!\}$. Then, $w! = e\cdot a\cdot b\cdot c = e$. We will show that some element is always duplicated in $F_\preceq(V_4)$. We have 4 cases:
 \begin{itemize}
-    \item[Case 1:] Let $x=e$. Then, $x! = e$, and $e$ is duplicated
-    \item[Case 2:] Let $y=e$. Then, $y! = x!\cdot y = x!\cdot e = x!$. Thus, $x!$ is duplicated
-    \item[Case 3:] Let $z=e$. Then, $z! = y!\cdot z = y!\cdot e = y!$. Thus, $y!$ is duplicated.
-    \item[Case 4:] Let $w=e$. Then, $w! = z! \cdot w = z!\cdot e = z!$. Thus, $z!$ is duplicated
+    \item[Case 1:] Let $x=e$. Then, $x! = e$, $y! = y$, $z! = y\cdot z = w$, and $w! = e$. Thus, only $e$ is duplicated. 
+    \item[Case 2:] Let $y=e$. Then, $x!=x$, $y! = x!\cdot e = x$, and $z! = x\cdot z = y$. Thus, only $x$ is duplicated
+    \item[Case 3:] Let $z=e$. Then, $x!=x$, $y!= x\cdot y = w$, and $z! = y!\cdot z = w\cdot e= w$. Thus, only $w$ is duplicated.
+    \item[Case 4:] Let $w=e$. Then, $x!=x$, $y! = y\cdot x = z$,  $z! = z\cdot z = e$, and $w! = z! \cdot w = e\cdot e = e$. Thus, only $e$ is duplicated.
 \end{itemize}
 Therefore, in all cases, $F_\preceq(V_4) = \{e,x,y\}$, where $x,y$ are distinct elements of $V_4$. 
 \end{proof}
@@ -169,7 +181,7 @@ For even $n$, $\frac{n}{2}$ cannot be the second smallest element.
 If $\frac{n}{2}$ is the second least element, then $\frac{n}{2}! = 0 + \frac{n}{2} = \frac{n}{2}$. However, we know by Lemma 2 that the factorial of the greatest element of $\ZnZ$ is $\frac{n}{2}$. Thus, if the second least element is $\frac{n}{2}$, then $\frac{n}{2}$ is duplicated, so $\FZ \neq \ZnZ$.
 \end{proof}
 \begin{lemma}
-If $o_1 = (0, g_1, g_2, \ldots)$ is a valid ordering, $0<g_1,g_2<\frac{n}{2}$, then $o_2 = (0,g_2, g_1, \ldots)$ is not a valid ordering
+If $o_1 = (0, g_1, g_2, \ldots )$ is a valid ordering, $0<g_1,g_2<\frac{n}{2}$, then $o_2 = (0,g_2, g_1, \ldots)$ is not a valid ordering
 \end{lemma}
 \begin{proof}
 The first few elements of $F_{o_1}(\ZnZ)$ are $\{0,g_1!, g_2!\ldots\} = \{0,g_1,g_1+g_2\ldots\}$. When the positions of $g_2$ and $g_1$ are interchanged in the ordering, resulting in $F_{o_2}(\ZnZ)$, the factorial set becomes $\{0,g_2!,g_1!,\ldots\} = \{0,g_2,g_1+g_2,\ldots\}$. As the rest of the ordering is unchanged, and since $g_2!$ in $o_1$ equals $g_1!$ in $o_2$, the only difference is $g_2$ in $F_{o_2}(\ZnZ)$. Since we know $o_1$ is a valid ordering, we know $F_{o_1}(\ZnZ)$ must equal $\ZnZ$. Therefore, $g_2$ must occur somewhere in $F_{o_1}(\ZnZ)$. Therefore, since $F_{o_1}(\ZnZ)$ equals $F_{o_2}(\ZnZ)$ outside of $g_2$ at the beginning of $F_{o_2}(\ZnZ)$, $g_2$ must also occur in the same position as it does in $F_{o_1}(\ZnZ)$. Therefore, $g_2$ repeats in $F_{o_2}(\ZnZ)$, and therefore cannot be a valid ordering.
@@ -211,7 +223,7 @@ The inverse of an element $g_i$, $n-g_i$, can also be written as $-g_i\pmod{n}$.
 If $(0, g_1, g_2, \ldots, g_n)$ is a valid ordering, then $(0, g_n, g_{n-1}, g_{n-2}, \ldots, g_1)$ is also a valid ordering.
 \end{lemma}
 \begin{proof}
-Let $o_1 = (0,g_1, g_2, \ldots, \g_{n-1})$ and $o_2 = (0, g_{n-1}, g_{n-2}, \ldots, g_1)$. Then, $g_1!_{o_2}$ = $\frac{n}{2} = \frac{n}{2} - 0!_{o_1}$. Likewise, $g_2!_{o_2} = \frac{n}{2}-g_1!_{o_1}$. In general, $g_i!_{o_2} = \frac{n}{2} - g_{i-1}!_{o_1}$. Thus, the original factorial subset is reconstructed from this definition, negated and shifted by $\frac{n}{2}$.  
+Let $o_1 = (0,g_1, g_2, \ldots, g_{n-1})$ and $o_2 = (0, g_{n-1}, g_{n-2}, \ldots, g_1)$. Then, $g_1!_{o_2}$ = $\frac{n}{2} = \frac{n}{2} - 0!_{o_1}$. Likewise, $g_2!_{o_2} = \frac{n}{2}-g_1!_{o_1}$. In general, $g_i!_{o_2} = \frac{n}{2} - g_{i-1}!_{o_1}$. Thus, the original factorial subset is reconstructed from this definition, negated and shifted by $\frac{n}{2}$.  
 \end{proof}
 %These two observations together reduce runtime by an upper factor of 4.
 
