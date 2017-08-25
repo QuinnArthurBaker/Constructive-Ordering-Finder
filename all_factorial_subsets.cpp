@@ -67,6 +67,10 @@ void subset_identifier(int v){
 	int index = 0;
 	int valid_subsets = 0;
 	do{//main loop
+		if(baselist[0]>int(n/2)){
+			valid_subsets*=2;
+			break;
+		}
 		valid_subsets += verify_permutation(baselist, n);
 	}while(next_permutation(baselist, baselist+n));
 	cout << "Total: " << valid_subsets << endl;
