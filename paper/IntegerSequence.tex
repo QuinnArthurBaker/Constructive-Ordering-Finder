@@ -1,0 +1,217 @@
+\documentclass{article}
+\usepackage[utf9]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage{rotating}
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;} 
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\ZnZ}{\ZZ/n\ZZ}
+\newcommand{\FZ}{F_{\preceq}\left(\ZZ/n\ZZ\right)}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{theorem}{Theorem}
+\newtheorem{prop}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{claim}{Claim}
+\setlength{\tabcolsep}{4pt}
+\title{Factorial Subgroups and Sequenceable Groups}
+\author{Zack Baker }
+\date{June 2017}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+A \textit{group} $G$ is a set of elements together with a binary operation $\cdot$ such that the following properties hold:
+\begin{enumerate}
+\item \textbf{Closure} of the set under the binary operation: For any $a,b\in G$, $a\cdot b$ is also an element of $G$.
+\item \textbf{Associativity:} for any $a,b,c\in G$, $(a\cdot b)\cdot c = a\cdot(b\cdot c)$.
+\item There exists an \textbf{identity} element $e \in G$ such that for all $a\in G$, $a\cdot e = e\cdot a = a$.
+\item Each element $a\in G$ has an \textbf{inverse} $b\in G$ such that $a\cdot b=b\cdot a = e$.
+\end{enumerate}
+
+When the binary operation is understood, and we are working in a multiplicative group, we will often use concatenation in place of writing the binary operation between two elements. For example, if we want to represent $a\cdot b$ for $a,b\in G$ we may simply write $ab$.
+
+Group theory aims to understand the relations between elements of a group. This paper aims to further analyze the relationship between elements of a group by extending the concept of the factorial from the integers to any group.
+
+For $n$ a non-negative integer, the \textit{factorial} of $n$, written $n!$ is defined as $n\times (n-1) \times \ldots \times 2 \times 1$, with the special case $0!=1$. Thus, $1! = 1$, $2!=2\times 1 = 2$, $3! = 3\times 2 \times 1 = 6$, and so on. We seek to extend the factorial by imposing an ordering on the group.
+
+
+Let $G$ be a finite group under the binary operator $\oplus$. To begin, we must define a binary relation $\preceq$ on $G$, where $\preceq$ is a total ordering. If the group's underlying set is numeric, and if $\preceq$ is the same as the standard $\leq$ ordering on the set, then we call $\preceq$ the \textit{natural ordering} for $G$. 
+
+
+We define the factorial of $g_k$, $g_k! = \bigoplus_{i=0}^{k} g_i = g_0 \oplus g_1 \oplus g_2 \oplus \ldots \oplus g_k$, where $g_0\preceq g_1\preceq g_2 \preceq \ldots \preceq g_{k-1} \preceq g_k$ and there are no elements $g\in G\setminus\{g_0,...,,g_k\}$ such that $g_0\preceq g\preceq g_k$.
+\begin{definition}
+Given a group $G$ with some total ordering $\preceq$, we define the \textit{factorial subset} of $G$, denoted $F_\preceq(G)$, as $\{g! | g \in G\}$. In other words, the factorial subset of a group is the set of the factorials of each of that group's elements. If $F_\preceq(G)$ is a subgroup of $G$, then we say it is a \textit{factorial subgroup} of $G$. 
+\end{definition}
+
+\textbf{Example:} The Klein 4-group, denoted $V_4$, is the abelian group of order 4 given by $\{e,a,b,c\}$, where $e$ is the identity, $a^2 = b^2 = c^2 = e$, $ab = c$, $ac = b$, and $bc = a$. This group has no factorial subsets, as seen in the following proof:
+
+
+\begin{proof} Since $a,b,c$ all have the same behaviour in this group, there are only four cases to consider: $e$ is either first, second, third or fourth in the ordering. Also, recall that a subgroup of a group of order 4 must contain either 1, 2 or 4 elements. In all cases, our factorial subset has exactly three elements and is therefore not a subgroup:
+\begin{enumerate}
+    \item If $e$ is first the ordering, $e!=e$, $a!=a$, $b!=c$ and $c!=e$.  
+    \item If $e$ is second, $a!=e!=a$, $b!=c$ and $c!=e$.
+    \item If $e$ is third, $a!=a$, $b!=e!=c$ and $c!=e$. 
+    \item If $e$ is last, $a!=a$, $b!=c$ and $c!=e!=e$.
+\end{enumerate}
+\end{proof}
+
+
+The idea of factorial subgroups is closely related to the definition of a sequenceable group. We state this definition below, using the language of factorial groups that we have developed above:
+
+\begin{definition} A finite group $G$ is \textit{sequenceable} if there exists an ordering $\preceq$ such that $F_\preceq(G) = G$. A countably infinite group is sequenceable if for some $\preceq$, $F_\preceq(G) = G$ and for $i\neq j$, $g_i!\neq g_j!$; i.e. no two distinct factorials evaluate to the same group element.
+\end{definition}
+
+The reason for the name \textit{sequenceable} is that the ordering $g_1\preceq g_2\preceq\cdots\preceq g_n$ is alternatively viewed as a seqence $g_1,g_2,...,g_n$. 
+
+Below we list some properties of sequenceable groups:
+
+\begin{enumerate}
+\item An ordering $\preceq$ such that $F_\preceq(G) = G$ always has its smallest element equal to the identity element of $G$ (that is, the identity is first in the sequence).
+\item The group $\mathbb{Z}/n\mathbb{Z}$ of the integers modulo $n$ is sequenceable if and only if $n$ is even ~\cite{Gor}. Note this in contrast to the fact that $V_4$ is not sequenceable though it has even order.
+\item Every countably infinite group is sequenceable. ~\cite{Van}
+
+\end{enumerate}
+
+
+
+In this paper we don't simply want to determine whether or not a group is sequenceable, but we wish to know more about the orderings which produce these factorial subgroups. For this purpose we create the following definitions:
+
+\begin{definition} Let $G$ be a finite group. A total ordering $\preceq$ on $G$ (respectively, sequence of elements of $G$) is said to be a subgroup order (resp. subgroup sequence) of $G$ if $F_\preceq(G)$ is a subgroup $G$. 
+\end{definition}
+
+\begin{definition} Let $G$ be a finite group. A total ordering $\preceq$ on $G$ (respectively, sequence of elements of $G$) is said to be a $G$-generating order, or more simply a generating order, (resp. $G$-generating sequence) of $G$ if $F_\preceq(G)=G$. 
+\end{definition}
+
+
+
+
+\section{Orderings on $\mathbb{Z}/n\mathbb{Z}$}
+
+
+In this section, we will specifically examine the factorial subsets and subgroups of the additive group of integers modulo $n$. We first make the following important observation about this group $\mathbb{Z}/n\mathbb{Z}$:
+
+\begin{prop}\label{fullgroupprop}
+$\FZ$ is a subgroup of $\ZnZ$ if and only if $\FZ = \ZnZ$.  
+\end{prop}
+
+\begin{proof} This proof is by contradiction. Assume that there exists a proper factorial subgroup of $\ZnZ$, $\FZ$. Then $\FZ=< \negmedspace m \negmedspace >$ for some nontrivial divisor $m$ of $n$. Then every element of $\FZ$ is a multiple of $m$. Let $g_0\preceq g_1\preceq ...\preceq g_{n-1}$ be the ordering of the elements of $\ZnZ$ under $\preceq$. For some $i\in\{0,...,n-1\}$, $g_i=1$. If $i=0$ then $g_i!=1\not\in < \negmedspace m \negmedspace >$, so assume $i>0$. Then, either $g_{i-1}!$ or $g_i!$ will not be in $\FZ$, since they differ by 1 and thus cannot both be multiples of $m$. Thus, there are no proper factorial subgroups of $\ZnZ$ for any $n\in\mathbb{Z}^+$. 
+\end{proof}
+
+\begin{lemma}\label{zerofirst} Let $\preceq$ be an order such that $\FZ = \ZnZ$. Then 0 must be the least element in this order.
+\end{lemma}
+\begin{proof} This proof is by contradiction. Assume that $0$ is not the least element. Then $g_i=0$ for some $i$, $1\leq i\leq n-1$. Then $g_i!=0+g_{i-1}!=g_{i-1}!$, so an element is duplicated and the factorial subset is smaller than the group. Therefore, $\FZ \neq \ZnZ$.
+\end{proof}
+
+
+If $\preceq$ is any ordering on $\ZnZ$, and the elements of $\ZnZ$ are denoted, in order, by $g_1,g_2,...,g_n$, then we always have
+\[g_n!=\sum_{i=0}^{n-1} i = \frac{n(n-1)}{2}.\]
+This is the same as the $(n-1)$st triangular number which is denoted $T_{n-1}$. It is a well-known fact that if $n$ is odd then $T_{n-1}\equiv0\pmod{n}$, and if $n$ is even, $T_{n-1}\equiv\frac{n}{2}\pmod{n}$. This is left as an exercise to the interested reader. 
+
+
+Proposition \ref{fullgroupprop} tells us that a group $\ZnZ$ has a factorial subgroup if and only if it is sequenceable. We stated above that $\ZnZ$ is sequenceable if and only if $n$ is even. Since understanding the proof of this fact in the original paper requires a deeper understanding of group theory, we present a proof of one direction of this ``if and only if'' statement, written using the notation of this paper.
+
+
+\begin{lemma}
+If $n$ is odd, $\FZ \neq \ZnZ$. 
+\end{lemma}
+\begin{proof} We prove this by showing that $F_{\preceq}(\ZnZ)$ will have fewer than $n$ elements whenever $n$ is odd.By Lemma \ref{zerofirst} we know that 0 must be the first element of this order; i.e. $g_1=0$. Then $g_1!=0$. Also,  $g_{n-1}! = T_{n-1} \equiv 0 \pmod{n}$, so $F_{\preceq}(\ZnZ)$ is always smaller than the entire group when $n$ is odd.
+\end{proof} 
+
+
+
+\subsection{Factorial Subgroups of $\ZnZ$ with the Natural Ordering}
+Let $\ZnZ$ be the additive group of integers modulo $n$, and let $\ZnZ$ be ordered by the natural ordering, $\leq$.  The following table describes $F_\leq(\ZnZ)$ for small $n$. \\ \\
+
+\begin{tabular}{|c|c|c|}
+\hline
+$n$ & $F_\leq(\ZZ/n\ZZ)$ & \textbf{Is $F_\leq(\ZZ/n\ZZ)$ a subgroup of $\ZZ/n\ZZ$?}\\
+\hline
+2 &$\{0,1\}$ & \checkmark \\
+\hline
+3 &\{0,1\} & \textbf{X}\\
+\hline
+4 &\{0,1,2,3\} & \checkmark \\
+\hline
+5 &\{0,1,3\} & \textbf{X} \\
+\hline
+6 & \{0,1,3,4\}& \textbf{X}\\
+\hline
+7 & \{0,1,3,6\}& \textbf{X} \\
+\hline
+8 &\{0,1,2,3,4,5,6,7\} & \checkmark \\
+\hline
+9 &\{0,1,3,6\} &\textbf{X} \\
+\hline
+10 &\{0,1,3,5,6,8\} & \textbf{X} \\
+
+\hline
+
+\end{tabular} \vspace{0.1in}
+
+
+As we can see, $F_\leq(\ZZ/n\ZZ)$ is only a subgroup of $\ZZ/n\ZZ$ if $n$ is 2, 4 or 8, $n\leq 10$. Continuing these calculations up to $n=10000$, $F_\leq(\ZZ/n\ZZ)$ is only a subgroup if $n = 2^k$, for some positive integer $k$, and for all $n=2^k$, $F_\leq(\ZZ/n\ZZ) = \ZZ/n\ZZ$
+\begin{conjecture}
+For $\leq$ the natural ordering, $F_\leq(\ZZ/n\ZZ)$ is equivalent to $\ZZ/n\ZZ$ if and only if $n=2^k$ for some positive integer $k$. 
+\end{conjecture}
+
+\subsection{Properties of $\ZnZ$-generating orders}
+
+In this subsection we will assume that $n$ is even, since we have observed that odd values of $n$ have no $\ZnZ$-generating orders.
+
+\begin{lemma}
+If $n>2$, $\frac{n}{2}$ cannot be the greatest element in a $\ZnZ$-generating order.
+\end{lemma}
+\begin{proof}
+This will be a proof by contradiction. Assume $\frac{n}{2}$ is the greatest element of $\ZnZ$ under a $\ZnZ$-generating order $\preceq$. Then, since the factorial of the largest element of $\ZnZ$ is $T_{n-1}$, $\frac{n}{2}! = T_{n-1}\equiv\frac{n}{2}\pmod{n}$. Let $g$ be the element directly preceding $\frac{n}{2}$ under the ordering $\preceq$. Then, $g! = \frac{n}{2}! - \frac{n}{2} = \frac{n}{2}-\frac{n}{2} = 0$. But since $0$ must be the first element under this ordering, we have two separate elements with factorials equal to 0. Therefore, $\FZ \neq \ZnZ$. 
+\end{proof}
+
+\begin{lemma}
+The value $\frac{n}{2}$ cannot be the second smallest element in a $\ZnZ$-generating order.
+\end{lemma}
+\begin{proof}
+By Lemma \ref{zerofirst} we know that the least element in a $\ZnZ$-generating order is 0. If $\frac{n}{2}$ is the second least element, then $\frac{n}{2}! = \frac{n}{2}+0 = \frac{n}{2}$. However, we know that the factorial of the greatest element of $\ZnZ$ is $\frac{n}{2}$. Thus, if the second least element is $\frac{n}{2}$, then $\frac{n}{2}$ is duplicated, so $\FZ \neq \ZnZ$.
+\end{proof}
+
+\begin{lemma}
+Let $\preceq_1$ be the order corresponding to the sequence $0, g_2, g_3,g_4,...,g_{n-1}$ and $\preceq_2$ be the order corresponding to the sequence $0, g_3, g_2,g_4,...,g_{n-1}$; the first sequence with the second and third elements swapped. If $\preceq_1$ is a $\ZnZ$-generating order then $\preceq_2$ is not. 
+\end{lemma}
+\begin{proof}
+The first three factorials under $\preceq_1$ are $0!,g_2!, g_3! = 0,g_2,g_2+g_3$. When the positions of $g_2$ and $g_3$ are interchanged in the ordering, the first three factorials under $\preceq_2$ are $0!,g_3!, g_2! = 0,g_3,g_2+g_3$. Since $\preceq_1$ is a $\ZnZ$-generating order then clearly the value $g_3\in F_{\preceq_1}$ and since this value is not equal to any of the first three factorials, we have that $g_3=g_i!$ for some $i\in\{4,...,n-1\}$. Thus under $\preceq_2$ the value $g_3$ is given by two factorials: $g_3!$ and $g_i!$, so $\preceq_2$ cannot be a $\ZnZ$-generating order.
+\end{proof}
+
+\begin{lemma}
+Let $\preceq$ be a $\ZnZ$-generating order with $0\preceq g_2\preceq g_3\preceq\cdots\preceq g_{n-1}$. Then the order $\preceq'$ given by $0\preceq' n-g_2\preceq' n-g_3\preceq'\cdots\preceq' n-g_{n-1}$ is also a $\ZnZ$-generating order.
+\end{lemma}
+\begin{proof} Since $\preceq$ is a $\ZnZ$-generating order then each factorial under $\preceq$ is a distinct residue mod $n$. We also observe that for each $i\in\{2,...,n-1\}$, taking factorials under $\preceq'$ we have
+\[(n-g_i)! \equiv -g_i - g_{i-1} - g_{i-2} - \ldots - g_2-0 \pmod{n}.\]  
+Thus under $\preceq'$, $(n-g+i)!$ has the same value mod $n$ as $-g_i!$ with this latter factorial taken using $\preceq$. Since all $g_i!$ under $\preceq$ must be distinct modulo $n$, so are all $-g_i!$. So $\preceq'$ gives us $n$ distinct factorial values and is therefore a $\ZnZ$-generating order.
+\end{proof}
+
+
+
+TO DO: EDIT THE LEMMA AND PROOF BELOW TO MATCH THE LANGUAGE USED IN THE ABOVE LEMMA AND PROOF
+\begin{lemma}
+If $(0, g_1, g_2, \ldots, g_n)$ is a $\ZnZ$-generating order, then $(0, g_n, g_{n-1}, g_{n-2}, \ldots, g_1)$ also is.
+\end{lemma}
+\begin{proof}
+Let $o_1 = (0,g_1, g_2, \ldots, g_{n-1})$ and $o_2 = (0, g_{n-1}, g_{n-2}, \ldots, g_1)$. Then, $g_1!_{o_2}$ = $\frac{n}{2} = \frac{n}{2} - 0!_{o_1}$. Likewise, $g_2!_{o_2} = \frac{n}{2}-g_1!_{o_1}$. In general, $g_i!_{o_2} = \frac{n}{2} - g_{i-1}!_{o_1}$. Thus, the original factorial subset is reconstructed from this definition, negated and shifted by $\frac{n}{2}$.  
+\end{proof}
+
+
+\begin{thebibliography}{}
+
+\bibitem{Gor} Gordon, B. {\em Sequences in groups with distinct partial products.} Pacific J. Math. \textbf{11}, (1961) pp. 1309-1313.
+
+\bibitem{Van} Vanden Eynden, C., {\em Countable sequenceable groups.} Discrete Mathematics \textbf{23}, (1978) pp. 317-318.
+
+\end{thebibliography}
+
+\end{document}
