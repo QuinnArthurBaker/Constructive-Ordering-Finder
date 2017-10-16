@@ -2,8 +2,7 @@
 #include <algorithm>
 #include <chrono>
 #include <ctime>
-#include <pthread.h>
-
+#include <cstdlib>
 using namespace std;
 
 /*
@@ -78,11 +77,13 @@ void subset_identifier(int v){
 	delete [] baselist;
 }
 
-int main(){
-
-	cout << "Enter a value for n: ";
-	int v;
-	cin >> v; 
+int main(int argc, char const *argv[])
+{
+	if(argc<2){
+		printf("[ERROR] too few arguments; value needed for n\n");
+		_Exit(1);
+	}
+	int v = atoi(argv[1]);
 	chrono::time_point<chrono::system_clock> start, end;
 	start = chrono::system_clock::now();
 
