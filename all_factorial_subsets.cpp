@@ -8,7 +8,7 @@
 
 std::mutex mu;
 //function prototypes
-void print_arr(int*,int);
+void print_arr(int*,int, FILE*);
 int* get_starting_baselist(int,int,int);
 void* thread_subsets_creator(void*);
 long factorial(int);
@@ -42,7 +42,7 @@ struct Thread_Param{
 };
 
 //this function confirms or denies if ord is a valid ordering
-int verify_ordering(int* ord, int size){
+int verify_ordering(int* ord, int size, int tid){
 	int sum = 0;
 	int* seen_vals = new int[size]();//this is an array to hold the already seen values from processing the factorials of the ordering
 	for(int i=0;i<size;i++){
@@ -57,6 +57,9 @@ int verify_ordering(int* ord, int size){
 	//	delete find_results;
 	}
 	//delete [] seen_vals;
+	mu.lock();
+	print_arr(ord, size, stderr);
+	mu.unlock();
 	return 1;//if we make it to the end, then the ordering is valid
 }
 //This function calculates the first permutation each thread will start processing
@@ -81,11 +84,11 @@ int* get_starting_baselist(int tid, int n, int partition_size){
 
 }
 //this function prints the first size elements from arr
-void print_arr(int* arr, int size){
+void print_arr(int* arr, int size,FILE* f=stdout){
 	for(int i=0;i<size;i++){
-		printf("%d,",arr[i]);
+		fprintf(f, "%d,",arr[i]);
 	}
-	printf("\n");
+	fprintf(f, "\n");
 	return;
 }
 
@@ -107,18 +110,22 @@ void* thread_ordering_creator(void* args){
 	long int good_orderings_calculated = 0;
 	long int total_orderings_seen = 0;
 	mu.lock();
-	printf("[THREAD %d] Entering loop; \n", params.id);
+	printf("[THREAD %d] Entering loop; First array:\n", params.id);
 	mu.unlock();
+	print_arr(iterate_list,v);
 	do{	
-		good_orderings_calculated += verify_ordering(iterate_list, v);
+		good_orderings_calculated += verify_ordering(iterate_list, v, params.id);
 		total_orderings_seen++;
 		if(total_orderings_seen>=params.partition_size){
+			mu.lock();
+			printf("[THREAD %d] Exiting loop; Last array: \n",params.id );
+			print_arr(iterate_list, v);
+			mu.unlock();
 			break;
 		}
 	}while(std::next_permutation(iterate_list, iterate_list+v));
 
-
-	
+	//printf("[THREAD %d] orderings seen: %ld - total orderings: %ld\n", params.id, total_orderings_seen, params.partition_size);	
 
 
 	return (void*)good_orderings_calculated;
@@ -174,6 +181,7 @@ int main(int argc, char const *argv[])
 	for(int i=0;i<max_threads;i++){
 		results_ptr[i] = new void*;
 		pthread_join(threads[i], &results_ptr[i]);
+		//printf("value from thread %d: %d\n",i, (int)(long)(results_ptr[i]) );
 		total_good_perms+= (int)(long)(results_ptr[i]);
 		//printf("results from thread %d: total good perms is now : %d\n", i, total_good_perms);
 		//delete  (int*)(results_ptr[i]);
