@@ -61,10 +61,7 @@ int verify_ordering(int* ord, int size, int tid){
 		}
 		//delete find_result;
 	}
-	mu.lock();
-	fprintf(stderr, "Valid ordering: ");
-	print_arr(ord, size, stderr);
-	mu.unlock();
+	
 	delete [] elements_seen;
 	return 1;
 }
@@ -116,7 +113,7 @@ void* thread_ordering_creator(void* args){
 	do{	
 		good_orderings_calculated += verify_ordering(iterate_list, v, params.id);
 		total_orderings_seen++;
-		if(total_orderings_seen>=params.partition_size){
+		if(total_orderings_seen>params.partition_size){
 			break;
 		}
 	}while(std::next_permutation(iterate_list, iterate_list+v));
@@ -187,7 +184,7 @@ int main(int argc, char const *argv[])
 	end = std::chrono::system_clock::now();
 	std::chrono::duration<double> time_taken = end-start;
 	printf("FINISHED - Total good orderings: %d - Time taken: %f\n", total_good_perms, time_taken.count());
-
-
+	
+	popen("echo -ne '\007' > /dev/tty1","r");//this should beep
 	return 0;
 }
