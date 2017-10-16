@@ -43,31 +43,28 @@ struct Thread_Param{
 
 //this function confirms or denies if ord is a valid ordering
 int verify_ordering(int* ord, int size, int tid){
-	int sum = 0;
-	int* seen_vals = new int[size]();//this is an array to hold the already seen values from processing the factorials of the ordering
+	int total = 0;
+	int n = size+1;
+	int* elements_seen = new int[size]();
 	for(int i=0;i<size;i++){
-		sum+= ord[i];//add the current value to the sum
-		sum %= size+1;//mod by the original n
-		int* find_results = std::find(seen_vals, seen_vals+size, sum);//calculate if sum has already been seen
-		if(sum==0 || find_results!=seen_vals+size){//if sum is 0 or we've already seen the current value
-	//		delete find_results;
-	//		delete [] seen_vals;
-			return 0;//it is not a valid subset
+		total += ord[i];
+		total %= n;
+		int *find_result = std::find(elements_seen, elements_seen+size, total);
+		if(find_result != elements_seen+size || total==0){
+			//delete find_result;
+			//delete [] elements_seen;
+			return 0;
+		}else{
+			elements_seen[i] = total;
 		}
-	//	delete find_results;
 	}
-	//delete [] seen_vals;
-	mu.lock();
-	print_arr(ord, size, stderr);
-	mu.unlock();
-	return 1;//if we make it to the end, then the ordering is valid
+	return 1;
 }
 //This function calculates the first permutation each thread will start processing
 int* get_starting_baselist(int tid, int n, int partition_size){
 	int v = n-1;
-	int target_list_count = tid*partition_size;//calculate the target list's position in the permutation order
+	long int target_list_count = tid*partition_size;//calculate the target list's position in the permutation order
 	int list_count = 0;
-	printf("[LIST %d] Target List Count: %d, \n", tid, target_list_count);
 	int* baselist = new int[v];//create the list to permute through
 	for(int i=0;i<v;i++){
 		baselist[i]=i+1;
@@ -98,28 +95,19 @@ void* thread_ordering_creator(void* args){
 	Thread_Param* tp = (Thread_Param*)args;
 	Thread_Param params = *(new Thread_Param(*tp));
 	
-	mu.lock();
-	printf("[THREAD %d] My start list is:\n", params.id);
+	
 	int v = params.n-1;
-	print_arr(params.baselist, params.n-1);
 	int* iterate_list = new int[v];//list used to iterate through
 	for(int i=0;i<v;i++){
 		iterate_list[i] = params.baselist[i];//deepcopy into iterate_list
 	}
-	mu.unlock();
 	long int good_orderings_calculated = 0;
 	long int total_orderings_seen = 0;
-	mu.lock();
-	printf("[THREAD %d] Entering loop; First array:\n", params.id);
-	mu.unlock();
-	print_arr(iterate_list,v);
 	do{	
 		good_orderings_calculated += verify_ordering(iterate_list, v, params.id);
 		total_orderings_seen++;
 		if(total_orderings_seen>=params.partition_size){
 			mu.lock();
-			printf("[THREAD %d] Exiting loop; Last array: \n",params.id );
-			print_arr(iterate_list, v);
 			mu.unlock();
 			break;
 		}
