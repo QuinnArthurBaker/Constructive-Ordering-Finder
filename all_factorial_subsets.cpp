@@ -141,11 +141,17 @@ int main(int argc, char const *argv[])
 	if(argc<2){//if usage is incorrect, exit
 		fprintf(stderr, "[ERROR] Expected value for n as CLI. Exiting with code 1\n");
 		_exit(1);
+	
+	}
+	int max_threads = sysconf(_SC_NPROCESSORS_ONLN);//get the number of online concurrent threads
+	int n = atoi(argv[1]);//convert the CLI to an int to process
+	if(n<max_threads){
+		fprintf(stderr, "[ERROR] CLI Argument too small; must be greater than the number of concurrent threads, %d\n", max_threads);
+		_exit(3);
 	}
 	std::chrono::time_point<std::chrono::system_clock> start, end;//create the timekeeping variables
 	start = std::chrono::system_clock::now();//initialize the first time variable
-	int n = atoi(argv[1]);//convert the CLI to an int to process
-	int max_threads = sysconf(_SC_NPROCESSORS_ONLN);//get the number of online concurrent threads
+	
 	long int total_perms = factorial((long)(n-1));
 	long int partition_size = total_perms/max_threads;//calculate the number of lists each thread should process
 	printf("MAX THREADS: %d\n", max_threads);
