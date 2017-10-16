@@ -45,19 +45,27 @@ struct Thread_Param{
 int verify_ordering(int* ord, int size, int tid){
 	int total = 0;
 	int n = size+1;
+	
 	int* elements_seen = new int[size]();
 	for(int i=0;i<size;i++){
 		total += ord[i];
+		int temp_total = total;
 		total %= n;
-		int *find_result = std::find(elements_seen, elements_seen+size, total);
+		int* find_result = std::find(elements_seen, elements_seen+size, total);
 		if(find_result != elements_seen+size || total==0){
 			//delete find_result;
-			//delete [] elements_seen;
+			delete [] elements_seen;
 			return 0;
 		}else{
 			elements_seen[i] = total;
 		}
+		//delete find_result;
 	}
+	mu.lock();
+	fprintf(stderr, "Valid ordering: ");
+	print_arr(ord, size, stderr);
+	mu.unlock();
+	delete [] elements_seen;
 	return 1;
 }
 //This function calculates the first permutation each thread will start processing
@@ -96,6 +104,8 @@ void* thread_ordering_creator(void* args){
 	Thread_Param params = *(new Thread_Param(*tp));
 	
 	
+	
+	
 	int v = params.n-1;
 	int* iterate_list = new int[v];//list used to iterate through
 	for(int i=0;i<v;i++){
@@ -107,8 +117,6 @@ void* thread_ordering_creator(void* args){
 		good_orderings_calculated += verify_ordering(iterate_list, v, params.id);
 		total_orderings_seen++;
 		if(total_orderings_seen>=params.partition_size){
-			mu.lock();
-			mu.unlock();
 			break;
 		}
 	}while(std::next_permutation(iterate_list, iterate_list+v));
