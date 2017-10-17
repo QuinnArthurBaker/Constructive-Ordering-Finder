@@ -3,6 +3,7 @@
 #include <chrono>
 #include <ctime>
 #include <cstdlib>
+#include <stdio.h>
 using namespace std;
 
 /*
@@ -92,6 +93,8 @@ int main(int argc, char const *argv[])
 	end = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds = end-start;
 	cout << "Time: " << elapsed_seconds.count() << endl;
+	FILE* f = popen("echo -ne '\007' > /dev/tty1", "r");
+	pclose(f);
 	return 0;
 }
 
