@@ -33,11 +33,13 @@ struct Thread_Param{
 	 	}
 	 	partition_size = ps;
 	}
-	 Thread_Param(Thread_Param& t){//Copy Constructor for Thread_Param
+	Thread_Param(Thread_Param& t){//Copy Constructor for Thread_Param
 	 	id = t.id;
 	 	n = t.n;
 	 	partition_size = t.partition_size;
 	 	baselist = t.baselist;//shallow copy; bad?
+	 }
+	~Thread_Param(){
 	 }
 };
 
@@ -95,8 +97,7 @@ void print_arr(int* arr, int size,FILE* f=stdout){
 //this function iterates through the permutations each thread is responsible for checking
 void* thread_ordering_creator(void* args){
 	// Get the Thread_Param struct out of args
-	Thread_Param* tp = (Thread_Param*)args;
-	Thread_Param params = *(new Thread_Param(*tp));	
+	Thread_Param params = *((Thread_Param*)(args));
 	
 	
 	int v = params.n-1;
@@ -115,8 +116,7 @@ void* thread_ordering_creator(void* args){
 		}
 	}while(std::next_permutation(iterate_list, iterate_list+v));
 
-	//printf("[THREAD %d] orderings seen: %ld - total orderings: %ld\n", params.id, total_orderings_seen, params.partition_size);	
-
+	delete [] iterate_list;
 
 	return (void*)good_orderings_calculated;
 }
@@ -154,7 +154,7 @@ int main(int argc, char const *argv[])
 	printf("MAX THREADS: %d\n", max_threads);
 	pthread_t threads[max_threads];//array of threads
 	for(int i=0;i<max_threads;i++){//for each thread
-		Thread_Param tp = *(new Thread_Param(i, get_starting_baselist(i,n,partition_size), n, partition_size));//create the Thread_Param object to supply to the function provided to each thread
+		Thread_Param tp = {i, get_starting_baselist(i,n,partition_size), n, partition_size};//create the Thread_Param object to supply to the function provided to each thread
 		int t_status = pthread_create(&threads[i], NULL, thread_ordering_creator,(void*)&tp);//create the thread
 		usleep(1000);
 		if(t_status!=0){//if there is an error creating the thread, exit
@@ -189,6 +189,9 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> time_taken = end-start;
 	printf("FINISHED - Total good orderings: %d - Time taken: %f\n", total_good_perms, time_taken.count());
 	
-	popen("echo -ne '\007' > /dev/tty1","r");//this should beep
+	FILE* f = popen("echo -ne '\007' > /dev/tty1","r");//this should beep
+	pclose(f);
 	return 0;
+
+
 }
