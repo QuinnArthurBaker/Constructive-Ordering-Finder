@@ -4,12 +4,12 @@
 #include <mutex> //used for mutex
 #include <chrono> //used for timing functions
 #include <algorithm> //used for std::copy
-#include <cstring>
+
 
 std::mutex mu;
 //function prototypes
 void print_arr(int*,int, FILE*);
-int* get_starting_baselist(int,int,int);
+int* get_starting_baselist(int,int,unsigned long long int);
 void* thread_subsets_creator(void*);
 long factorial(int);
 int verify_ordering(int*,int);
@@ -19,11 +19,11 @@ struct Thread_Param{
 	int id;//the id of the thread
 	int* baselist;// a pointer to the permutation to start calculation from
 	int n;//the group to calculate the permutations for; Z/nZ
-	long partition_size;//the number of permutations to calculate
+	unsigned long long int partition_size;//the number of permutations to calculate
 	Thread_Param(){
 
 	}
-	Thread_Param(int i, int* b, int n_val, long ps){
+	Thread_Param(int i, int* b, int n_val, unsigned long long int ps){
 	 	id = i;
 	 	//baselist = b;//shallow copy; bad?
 		n = n_val;
@@ -61,15 +61,14 @@ int verify_ordering(int* ord, int size, int tid){
 		}
 		//delete find_result;
 	}
-	
 	delete [] elements_seen;
 	return 1;
 }
 //This function calculates the first permutation each thread will start processing
-int* get_starting_baselist(int tid, int n, int partition_size){
+int* get_starting_baselist(int tid, int n, unsigned long long int  partition_size){
 	int v = n-1;
-	long int target_list_count = tid*partition_size;//calculate the target list's position in the permutation order
-	int list_count = 0;
+	unsigned long long int target_list_count = tid*partition_size;//calculate the target list's position in the permutation order
+	unsigned long long int list_count = 0;
 	int* baselist = new int[v];//create the list to permute through
 	for(int i=0;i<v;i++){
 		baselist[i]=i+1;
@@ -81,7 +80,6 @@ int* get_starting_baselist(int tid, int n, int partition_size){
 		}
 	}
 	while(std::next_permutation(baselist,baselist+v));
-	
 	return baselist;
 
 }
@@ -98,9 +96,7 @@ void print_arr(int* arr, int size,FILE* f=stdout){
 void* thread_ordering_creator(void* args){
 	// Get the Thread_Param struct out of args
 	Thread_Param* tp = (Thread_Param*)args;
-	Thread_Param params = *(new Thread_Param(*tp));
-	
-	
+	Thread_Param params = *(new Thread_Param(*tp));	
 	
 	
 	int v = params.n-1;
@@ -109,11 +105,12 @@ void* thread_ordering_creator(void* args){
 		iterate_list[i] = params.baselist[i];//deepcopy into iterate_list
 	}
 	long int good_orderings_calculated = 0;
-	long int total_orderings_seen = 0;
+	unsigned long long int total_orderings_seen = 0;
 	do{	
-		good_orderings_calculated += verify_ordering(iterate_list, v, params.id);
+		int is_good_ordering = verify_ordering(iterate_list, v, params.id);
+		good_orderings_calculated += is_good_ordering;
 		total_orderings_seen++;
-		if(total_orderings_seen>params.partition_size){
+		if(total_orderings_seen>params.partition_size-1){
 			break;
 		}
 	}while(std::next_permutation(iterate_list, iterate_list+v));
@@ -152,13 +149,14 @@ int main(int argc, char const *argv[])
 	std::chrono::time_point<std::chrono::system_clock> start, end;//create the timekeeping variables
 	start = std::chrono::system_clock::now();//initialize the first time variable
 	
-	long int total_perms = factorial((long)(n-1));
-	long int partition_size = total_perms/max_threads;//calculate the number of lists each thread should process
+	unsigned long long int total_perms = factorial((long)(n-1));
+	unsigned long long int partition_size = (total_perms/max_threads)/2;//calculate the number of lists each thread should process
 	printf("MAX THREADS: %d\n", max_threads);
 	pthread_t threads[max_threads];//array of threads
 	for(int i=0;i<max_threads;i++){//for each thread
 		Thread_Param tp = *(new Thread_Param(i, get_starting_baselist(i,n,partition_size), n, partition_size));//create the Thread_Param object to supply to the function provided to each thread
 		int t_status = pthread_create(&threads[i], NULL, thread_ordering_creator,(void*)&tp);//create the thread
+		usleep(1000);
 		if(t_status!=0){//if there is an error creating the thread, exit
 			fprintf(stderr, "[ERROR] Error creating thread %d; status is %d; exiting\n", i, t_status);
 			_exit(2);
@@ -175,12 +173,18 @@ int main(int argc, char const *argv[])
 		results_ptr[i] = new void*;
 		pthread_join(threads[i], &results_ptr[i]);
 		//printf("value from thread %d: %d\n",i, (int)(long)(results_ptr[i]) );
+		mu.lock();
 		total_good_perms+= (int)(long)(results_ptr[i]);
+		mu.unlock();
+
 		//printf("results from thread %d: total good perms is now : %d\n", i, total_good_perms);
 		//delete  (int*)(results_ptr[i]);
 		//delete threads_args_ptr[i];
 	}
 	delete [] results_ptr;
+	printf("Pre-mult: %d\n", total_good_perms);
+	total_good_perms*=2;
+	printf("Final val: %d\n", total_good_perms);
 	end = std::chrono::system_clock::now();
 	std::chrono::duration<double> time_taken = end-start;
 	printf("FINISHED - Total good orderings: %d - Time taken: %f\n", total_good_perms, time_taken.count());
