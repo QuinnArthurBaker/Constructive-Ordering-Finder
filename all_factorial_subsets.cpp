@@ -66,6 +66,27 @@ int verify_ordering(int* ord, int size, int tid){
 	delete [] elements_seen;
 	return 1;
 }
+int* get_starting_baselist2(int* old_baselist, int n, unsigned long long int partition_size){
+	int v = n-1;
+	unsigned long long int list_count = 0;
+	int* perm_list = new int[v];
+	if(old_baselist==NULL){
+		for(int i=0;i<v;i++){
+			perm_list[i] = i+1;
+		}
+		return perm_list;
+	}
+	for(int i=0;i<v;i++){
+		perm_list[i] = old_baselist[i];
+	}
+	do{
+		list_count++;
+		if(list_count>=partition_size){
+			break;
+		}
+	}while(std::next_permutation(perm_list, perm_list+v));
+	return perm_list;
+}
 //This function calculates the first permutation each thread will start processing
 int* get_starting_baselist(int tid, int n, unsigned long long int  partition_size){
 	int v = n-1;
@@ -97,9 +118,7 @@ void print_arr(int* arr, int size,FILE* f=stdout){
 //this function iterates through the permutations each thread is responsible for checking
 void* thread_ordering_creator(void* args){
 	// Get the Thread_Param struct out of args
-	Thread_Param params = *((Thread_Param*)(args));
-	
-	
+	Thread_Param params = *((Thread_Param*)(args));	
 	int v = params.n-1;
 	int* iterate_list = new int[v];//list used to iterate through
 	for(int i=0;i<v;i++){
@@ -117,7 +136,6 @@ void* thread_ordering_creator(void* args){
 	}while(std::next_permutation(iterate_list, iterate_list+v));
 
 	delete [] iterate_list;
-
 	return (void*)good_orderings_calculated;
 }
 
@@ -140,9 +158,14 @@ int main(int argc, char const *argv[])
 		_exit(1);
 	
 	}
-	int max_threads = sysconf(_SC_NPROCESSORS_ONLN);//get the number of online concurrent threads
+	int thread_mult = 1;
+	if(argc>2){
+		thread_mult = atoi(argv[2]);
+	}
+	int max_threads = thread_mult*sysconf(_SC_NPROCESSORS_ONLN);//get the number of online concurrent threads
 	int n = atoi(argv[1]);//convert the CLI to an int to process
-	if(n<max_threads){
+	//int max_threads = n;
+	if(n<(max_threads)/thread_mult){
 		fprintf(stderr, "[ERROR] CLI Argument too small; must be greater than the number of concurrent threads, %d\n", max_threads);
 		_exit(3);
 	}
@@ -153,8 +176,15 @@ int main(int argc, char const *argv[])
 	unsigned long long int partition_size = (total_perms/max_threads)/2;//calculate the number of lists each thread should process
 	printf("MAX THREADS: %d\n", max_threads);
 	pthread_t threads[max_threads];//array of threads
+	int* baselist = NULL;
 	for(int i=0;i<max_threads;i++){//for each thread
-		Thread_Param tp = {i, get_starting_baselist(i,n,partition_size), n, partition_size};//create the Thread_Param object to supply to the function provided to each thread
+		std::chrono::time_point<std::chrono::system_clock> list_s, list_e;
+		list_s = std::chrono::system_clock::now();
+		baselist = get_starting_baselist2(baselist, n, partition_size);
+		list_e= std::chrono::system_clock::now();
+		std::chrono::duration<double> list_t = list_e-list_s;
+		printf("[LIST %d] Time : %f\n", i, list_t.count());
+		Thread_Param tp = {i,baselist, n, partition_size};//create the Thread_Param object to supply to the function provided to each thread
 		int t_status = pthread_create(&threads[i], NULL, thread_ordering_creator,(void*)&tp);//create the thread
 		usleep(1000);
 		if(t_status!=0){//if there is an error creating the thread, exit
