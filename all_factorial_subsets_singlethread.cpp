@@ -19,12 +19,11 @@ inline int factorial(int n){
 	}
 }
 
-void print_arr(int* arr, int size){
+void print_arr(int* arr, int size, FILE* out=stdout){
 	for(int i=0;i<size;i++){
-		cout << arr[i] << ",";
+		fprintf(out, "%d, ", arr[i]);
 	}
-	cout << endl;
-
+	fprintf(out, "\n");
 }
 int verify_permutation (int*& perm, int& n){
 
