@@ -59,6 +59,9 @@ int verify_ordering(int* ord, int size, int tid){
 			delete [] elements_seen;
 			return 0;
 		}else{
+		///if((i+1)==size){//speed upgrade maybe?
+		//	 	break;
+		//	}
 			elements_seen[i] = total;
 		}
 		//delete find_result;
@@ -178,15 +181,15 @@ int main(int argc, char const *argv[])
 	pthread_t threads[max_threads];//array of threads
 	int* baselist = NULL;
 	for(int i=0;i<max_threads;i++){//for each thread
-		std::chrono::time_point<std::chrono::system_clock> list_s, list_e;
-		list_s = std::chrono::system_clock::now();
+//		std::chrono::time_point<std::chrono::system_clock> list_s, list_e;
+//		list_s = std::chrono::system_clock::now();
 		baselist = get_starting_baselist2(baselist, n, partition_size);
-		list_e= std::chrono::system_clock::now();
-		std::chrono::duration<double> list_t = list_e-list_s;
-		printf("[LIST %d] Time : %f\n", i, list_t.count());
+//		list_e= std::chrono::system_clock::now();
+		//std::chrono::duration<double> list_t = list_e-list_s;
+		//printf("[LIST %d] Time : %f\n", i, list_t.count());
 		Thread_Param tp = {i,baselist, n, partition_size};//create the Thread_Param object to supply to the function provided to each thread
 		int t_status = pthread_create(&threads[i], NULL, thread_ordering_creator,(void*)&tp);//create the thread
-		usleep(1000);
+		usleep(1000);//correction for very fast runs, n<10
 		if(t_status!=0){//if there is an error creating the thread, exit
 			fprintf(stderr, "[ERROR] Error creating thread %d; status is %d; exiting\n", i, t_status);
 			_exit(2);
@@ -212,15 +215,15 @@ int main(int argc, char const *argv[])
 		//delete threads_args_ptr[i];
 	}
 	delete [] results_ptr;
-	printf("Pre-mult: %d\n", total_good_perms);
 	total_good_perms*=2;
-	printf("Final val: %d\n", total_good_perms);
 	end = std::chrono::system_clock::now();
 	std::chrono::duration<double> time_taken = end-start;
-	printf("FINISHED - Total good orderings: %d - Time taken: %f\n", total_good_perms, time_taken.count());
+	double total_time = time_taken.count();
+	printf("FINISHED - Total good orderings: %d - Time taken: %f\n", total_good_perms, total_time);
 	
-	FILE* f = popen("echo -ne '\007' > /dev/tty1","r");//this should beep
+	FILE* f = popen("echo -ne '\007' > $(tty)","r");//this should beep
 	pclose(f);
+	fprintf(stderr, "%d,%f\n", thread_mult, total_time);
 	return 0;
 
 
