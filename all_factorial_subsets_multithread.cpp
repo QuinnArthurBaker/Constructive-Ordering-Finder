@@ -90,25 +90,7 @@ int* get_starting_baselist2(int* old_baselist, int n, unsigned long long int par
 	}while(std::next_permutation(perm_list, perm_list+v));
 	return perm_list;
 }
-//This function calculates the first permutation each thread will start processing
-int* get_starting_baselist(int tid, int n, unsigned long long int  partition_size){
-	int v = n-1;
-	unsigned long long int target_list_count = tid*partition_size;//calculate the target list's position in the permutation order
-	unsigned long long int list_count = 0;
-	int* baselist = new int[v];//create the list to permute through
-	for(int i=0;i<v;i++){
-		baselist[i]=i+1;
-	}
-	do{
-		list_count++;
-		if(list_count>=target_list_count){
-			break;
-		}
-	}
-	while(std::next_permutation(baselist,baselist+v));
-	return baselist;
 
-}
 //this function prints the first size elements from arr
 void print_arr(int* arr, int size,FILE* f=stdout){
 	for(int i=0;i<size;i++){
@@ -220,10 +202,9 @@ int main(int argc, char const *argv[])
 	std::chrono::duration<double> time_taken = end-start;
 	double total_time = time_taken.count();
 	printf("FINISHED - Total good orderings: %d - Time taken: %f\n", total_good_perms, total_time);
-	
+	fprintf(stderr, "%d,%f\n", thread_mult, total_time);	
 	FILE* f = popen("echo -ne '\007' > $(tty)","r");//this should beep
 	pclose(f);
-	fprintf(stderr, "%d,%f\n", thread_mult, total_time);
 	return 0;
 
 
