@@ -103,24 +103,25 @@ void print_arr(int* arr, int size,FILE* f=stdout){
 //this function iterates through the permutations each thread is responsible for checking
 void* thread_ordering_creator(void* args){
 	// Get the Thread_Param struct out of args
-	Thread_Param params = *((Thread_Param*)(args));	
-	int v = params.n-1;
+	Thread_Param* params = (Thread_Param*)(args);	
+	int v = params->n-1;
 	int* iterate_list = new int[v];//list used to iterate through
 	for(int i=0;i<v;i++){
-		iterate_list[i] = params.baselist[i];//deepcopy into iterate_list
+		iterate_list[i] = params->baselist[i];//deepcopy into iterate_list
 	}
 	long int good_orderings_calculated = 0;
 	unsigned long long int total_orderings_seen = 0;
 	do{	
-		int is_good_ordering = verify_ordering(iterate_list, v, params.id);
+		int is_good_ordering = verify_ordering(iterate_list, v, params->id);
 		good_orderings_calculated += is_good_ordering;
 		total_orderings_seen++;
-		if(total_orderings_seen>params.partition_size-1){
+		if(total_orderings_seen>params->partition_size-1){
 			break;
 		}
 	}while(std::next_permutation(iterate_list, iterate_list+v));
 
 	delete [] iterate_list;
+	delete params;
 	return (void*)good_orderings_calculated;
 }
 
@@ -169,9 +170,9 @@ int main(int argc, char const *argv[])
 //		list_e= std::chrono::system_clock::now();
 		//std::chrono::duration<double> list_t = list_e-list_s;
 		//printf("[LIST %d] Time : %f\n", i, list_t.count());
-		Thread_Param tp = {i,baselist, n, partition_size};//create the Thread_Param object to supply to the function provided to each thread
-		int t_status = pthread_create(&threads[i], NULL, thread_ordering_creator,(void*)&tp);//create the thread
-		usleep(1000);//correction for very fast runs, n<10
+		Thread_Param* tp = new Thread_Param(i,baselist, n, partition_size);//create the Thread_Param object to supply to the function provided to each thread
+		int t_status = pthread_create(&threads[i], NULL, thread_ordering_creator,(void*)tp);//create the thread
+		//usleep(1000);//correction for very fast runs, n<10
 		if(t_status!=0){//if there is an error creating the thread, exit
 			fprintf(stderr, "[ERROR] Error creating thread %d; status is %d; exiting\n", i, t_status);
 			_exit(2);
