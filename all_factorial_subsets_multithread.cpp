@@ -90,6 +90,7 @@ int* get_starting_baselist2(int* old_baselist, int n, unsigned long long int par
 			break;
 		}
 	}while(std::next_permutation(perm_list, perm_list+v));
+	delete old_baselist;
 	return perm_list;
 }
 
@@ -142,7 +143,7 @@ inline long factorial(long n){
 int main(int argc, char const *argv[])
 {
 	if(argc<2){//if usage is incorrect, exit
-		fprintf(stderr, "[ERROR] Expected value for n as CLI. Exiting with code 1\n");
+		fprintf(stderr, "USAGE: %s n [THREAD_MULT]\n", argv[0]);
 		_exit(1);
 	
 	}
@@ -151,10 +152,9 @@ int main(int argc, char const *argv[])
 		thread_mult = atoi(argv[2]);
 	}
 	int max_threads = thread_mult*sysconf(_SC_NPROCESSORS_ONLN);//get the number of online concurrent threads
-	int n = atoi(argv[1]);//convert the CLI to an int to process
-	//int max_threads = n;
+	int n = atoi(argv[1]);//convert the command line argument to an int to process
 	if(n<(max_threads)/thread_mult){
-		fprintf(stderr, "[ERROR] CLI Argument too small; must be greater than the number of concurrent threads, %d\n", max_threads);
+		fprintf(stderr, "[ERROR] Command Line argument too small; must be greater than the number of concurrent threads, %d\n", max_threads);
 		_exit(3);
 	}
 	std::chrono::time_point<std::chrono::system_clock> start, end;//create the timekeeping variables
@@ -166,42 +166,25 @@ int main(int argc, char const *argv[])
 	pthread_t threads[max_threads];//array of threads
 	int* baselist = NULL;
 	for(int i=0;i<max_threads;i++){//for each thread
-//		std::chrono::time_point<std::chrono::system_clock> list_s, list_e;
-//		list_s = std::chrono::system_clock::now();
 		baselist = get_starting_baselist2(baselist, n, partition_size);
-//		list_e= std::chrono::system_clock::now();
-		//std::chrono::duration<double> list_t = list_e-list_s;
-		//printf("[LIST %d] Time : %f\n", i, list_t.count());
-		Thread_Param* tp = new Thread_Param(i,baselist, n, partition_size);//create the Thread_Param object to supply to the function provided to each thread
+		Thread_Param* tp = new Thread_Param(i,baselist, n, partition_size);//create the Thread_Param object to supply to the function provided to each thread//allocate it dynamically so each thread has its own struct
 		int t_status = pthread_create(&threads[i], NULL, thread_ordering_creator,(void*)tp);//create the thread
-		//usleep(1000);//correction for very fast runs, n<10
 		if(t_status!=0){//if there is an error creating the thread, exit
 			fprintf(stderr, "[ERROR] Error creating thread %d; status is %d; exiting\n", i, t_status);
 			_exit(2);
 		}
 
 	}
-
-
-
-
 	int total_good_perms = 0;
-	//void** results_ptr = new void*[max_threads];
+
 	for(int i=0;i<max_threads;i++){
-		void* results_ptr = malloc(sizeof(long));
-		//results_ptr[i] = new void*;
+		void* results_ptr;
 		pthread_join(threads[i], &results_ptr);
-		//printf("value from thread %d: %d\n",i, (int)(long)(results_ptr[i]) );
 		mu.lock();
 		total_good_perms+= (int)(long)(results_ptr);
 		mu.unlock();
-
-
-		//printf("results from thread %d: total good perms is now : %d\n", i, total_good_perms);
-		//delete  (int*)(results_ptr[i]);
-		//delete threads_args_ptr[i];
 	}
-	//delete [] results_ptr;
+
 	total_good_perms*=2;
 	end = std::chrono::system_clock::now();
 	std::chrono::duration<double> time_taken = end-start;
