@@ -40,6 +40,7 @@ struct Thread_Param{
 	 	baselist = t.baselist;//shallow copy; bad?
 	 }
 	~Thread_Param(){
+		delete [] baselist;
 	 }
 };
 
@@ -49,11 +50,12 @@ int verify_ordering(int* ord, int size, int tid){
 	int n = size+1;
 	
 	int* elements_seen = new int[size]();
+	int* find_result = NULL;
 	for(int i=0;i<size;i++){
 		total += ord[i];
 		int temp_total = total;
 		total %= n;
-		int* find_result = std::find(elements_seen, elements_seen+size, total);
+		find_result = std::find(elements_seen, elements_seen+size, total);
 		if(find_result != elements_seen+size || total==0){
 			//delete find_result;
 			delete [] elements_seen;
@@ -184,26 +186,28 @@ int main(int argc, char const *argv[])
 
 
 	int total_good_perms = 0;
-	void** results_ptr = new void*[max_threads];
+	//void** results_ptr = new void*[max_threads];
 	for(int i=0;i<max_threads;i++){
-		results_ptr[i] = new void*;
-		pthread_join(threads[i], &results_ptr[i]);
+		void* results_ptr = malloc(sizeof(long));
+		//results_ptr[i] = new void*;
+		pthread_join(threads[i], &results_ptr);
 		//printf("value from thread %d: %d\n",i, (int)(long)(results_ptr[i]) );
 		mu.lock();
-		total_good_perms+= (int)(long)(results_ptr[i]);
+		total_good_perms+= (int)(long)(results_ptr);
 		mu.unlock();
+
 
 		//printf("results from thread %d: total good perms is now : %d\n", i, total_good_perms);
 		//delete  (int*)(results_ptr[i]);
 		//delete threads_args_ptr[i];
 	}
-	delete [] results_ptr;
+	//delete [] results_ptr;
 	total_good_perms*=2;
 	end = std::chrono::system_clock::now();
 	std::chrono::duration<double> time_taken = end-start;
 	double total_time = time_taken.count();
 	printf("FINISHED - Total good orderings: %d - Time taken: %f\n", total_good_perms, total_time);
-	fprintf(stderr, "%d,%f\n", thread_mult, total_time);	
+	printf("%d,%f\n", thread_mult, total_time);	
 	FILE* f = popen("echo -ne '\007' > $(tty)","r");//this should beep
 	pclose(f);
 	return 0;
