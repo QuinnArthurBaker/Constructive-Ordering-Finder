@@ -191,8 +191,9 @@ int main(int argc, char const *argv[])
 	double total_time = time_taken.count();
 	printf("FINISHED - Total good orderings: %d - Time taken: %f\n", total_good_perms, total_time);
 	printf("%d,%f\n", thread_mult, total_time);	
-	FILE* f = popen("echo -ne '\007' > $(tty)","r");//this should beep
-	pclose(f);
+	fprintf(stderr, "%d,%f\n", thread_mult, total_time);
+//	FILE* f = popen("echo -ne '\007' > $(tty)","r");//this should beep
+//	pclose(f);
 	return 0;
 
 
