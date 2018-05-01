@@ -1,5 +1,8 @@
 compile:
-	clang++ -std=c++11 -o fact_sub_single all_factorial_subsets_singlethread.cpp
-	clang++ -std=c++11 -lpthread -o fact_sub_multi all_factorial_subsets_multithread.cpp
+	g++ -std=c++11 -o bin/coSingle src/constructiveOrderingsSinglethread.cpp
+	clang++ -std=c++11 -lpthread -o bin/coMultiC src/constructiveOrderingsMultithread.cpp
+	g++ -std=c++11 -lpthread -o bin/coMultiG src/constructiveOrderingsMultithread.cpp
+	g++ -std=c++11 -o bin/coAdjMatrix src/constructiveOrderingsAdjacencyMatrix.cpp
+
 clean:
-	rm fact_sub_multi fact_sub_single
+	rm bin/*
