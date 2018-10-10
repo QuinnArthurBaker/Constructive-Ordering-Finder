@@ -40,7 +40,7 @@ struct Thread_Param{
 	 	id = t.id;
 	 	n = t.n;
 	 	partition_size = t.partition_size;
-	 	baselist = t.baselist;//shallow copy; bad?
+	 	baselist = t.baselist;
 	 }
 	~Thread_Param(){
 		delete [] baselist;
@@ -146,7 +146,7 @@ int verify_ordering(int* ord, int size, int tid, bool results){
 		total += ord[i];
 		total %= n;
 		//if the element was found previously, or if the sum is 0, discard this ordering. 
-		if(elements_seen[total] || total==0){
+		if(elements_seen[total] || total==0 || (total==n/2 && i!=size-1)){
 			delete [] elements_seen;
 			return 0;
 		}
