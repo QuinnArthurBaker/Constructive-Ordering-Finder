@@ -13,7 +13,9 @@ void* thread_ordering_creator(void*);
 int verify_ordering(int*,int);
 int* get_starting_baselist(int*, int, long int);
 unsigned long factorial(int);
-
+int* get_tuple(int, unsigned long);
+int* get_list(int*, int, int);
+void print_vector(std::vector<int>);
 
 //Struct to hold the parameters to provide to the function each thread is processing
 struct Thread_Param{
@@ -88,7 +90,8 @@ int main(int argc, char const *argv[])
 	pthread_t threads[max_threads];//create the array of threads
 	int* baselist = NULL;// pointer to point to the first ordering each thread begins with
 	for(int i=0;i<max_threads;i++){//for each thread,
-		baselist = get_starting_baselist(baselist, n, partition_size); //generate the starting ordering for the thread
+		//baselist = get_starting_baselist(baselist, n, partition_size); //generate the starting ordering for the thread
+		baselist = get_list(get_tuple(n-1, partition_size*i),n,i);
 		Thread_Param* tp = new Thread_Param(i,baselist, n, partition_size,save_results);//create the Thread_Param object to supply to the function provided to each thread//allocate it dynamically so each thread has its own struct
 		int t_status = pthread_create(&threads[i], NULL, thread_ordering_creator,(void*)tp);//create the thread, having it compute the thread_ordering_creator function
 		if(t_status!=0){//if there is an error creating the thread, exit
@@ -263,4 +266,46 @@ unsigned long factorial(int n){
 	}
 }
 
+/**
+*	This method generates a tuple representing the coefficients of tuple_num's representation in factorial base. This is used to calculate the tuple_numth lexicographical permutation.
+*	INPUT:
+		- m: the size of the group minus 1, i.e. n-1
+		- tuple_num: the value to convert to factorial base.
+	OUTPUT:
+		- an array of size m representing a tuple of coefficients of the factorial representation of tuple_num
+*/
+int* get_tuple(int m, unsigned long tuple_num){
+	int* tuple = new int[m];
+	for(int i=0;i<m;i++){
+		int v = tuple_num/factorial(m-i);
+		tuple[i] = v;
+		tuple_num=tuple_num-factorial(m-i)*v;
+	}
+	return tuple;
+}
 
+int* get_list(int* tuple, int n, int id){
+	std::vector<int> ordered_list;
+	for(int i=0;i<n;i++){
+		ordered_list.push_back(i);
+	}
+	int* list = new int[n];
+	for(int i=0;i<n-1;i++){
+		list[i] = ordered_list.at(tuple[i]);
+		ordered_list.erase(ordered_list.begin()+tuple[i]);
+	}
+	list[n-1] = ordered_list.front();
+
+	int* nl = new int[n-1];
+	for(int i=0;i<n-1;i++){
+		nl[i] = list[i+1];
+	}
+	return nl;
+	
+}
+
+void print_vector(std::vector<int> v){
+	for(int i=0;i<v.size();i++){
+		printf("v[%d]: %d\n", i, v.at(i));
+	}
+}
