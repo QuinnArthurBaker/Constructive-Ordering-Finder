@@ -6,16 +6,16 @@ This program calculates the number of constructive orderings for the group of in
 Given the group of integers mod n (Z/nZ), a constructive ordering is a permutation of the group for which the partial sums for each element reproduce the entire group. For example, for the group of integers mod 4, the permutation (0,1,2,3) is a constructive ordering, because the partial sums of 0,1,2 and 3 give 0,1,3 and 2, respectively, thus reproducing the entire group. We seek to find the total number of constructive orderings for the group of integers mod n for a given value of n. These values correspond to the integer sequence [A141599](https://oeis.org/A141599) for even values of n. 
 
 # Installation
-Simply run `make` to build both versions. It is currently built using `clang++`. Run `make clean` to remove the binaries.
+Simply run `make` to build both versions. It is currently built using `clang++` and `g++`. Run `make clean` to remove the binaries.
 # Usage
 
-### `fact_sub_single`
+### `coSingle`
 
-`./fact_sub_single [n]`
+`./coSingle [n]`
 * n is the modulus of the group
 
-### `fact_sub_multi`
+### `coMultiC & coMultiG`
 
-`./fact_sub_multi [n] (thread_mult)`
+`./coMultiC [n] (thread_mult)` or `./coMultiG [n] (thread_mult)`
 * n is the modulus of the group
 * thread_mult (optional) is used to calculate the total number of threads to use across the program. The total number of threads used is determined by the total number of concurrent threads of the machine times thread_mult. The default value is 1. 
