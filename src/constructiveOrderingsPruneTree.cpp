@@ -19,7 +19,7 @@ typedef unsigned long bigValue;
 
 //function prototypes
 //this method will calculate the total number of constructive orderings / 2 for a given value of n. the bigValue parameter is incremented to indicate a constructive ordering has been found.
-void numOrderings(std::vector<int>, int, bigValue&, std::vector<int>, std::vector<int>);
+void numOrderings(std::vector<int>, int, bigValue&, std::vector<int>);
 //overloaded print operator for std::vector
 std::ostream& operator<<(std::ostream&, std::vector<int>);
 
@@ -44,7 +44,6 @@ int main(int argc, const char* argv[]){
 	bigValue totalOrderings = 0;
 
 	//vectors used in numOrderings
-	std::vector<int> processedVals;//the values used in the current ordering. if the current ordering is a constructive ordering, this vector will contain the ordering
 	std::vector<int> remainingVec;// the values not yet used in the current ordering's calculations
 	std::vector<int> daggers;//the values of the daggers of the elements of the current ordering
 
@@ -58,17 +57,17 @@ int main(int argc, const char* argv[]){
 	//iterate through [1..n/2), as we know constructive orderings are "mirrored" across (0, n/2, ...). That is, if (0, a_1, a_2, ...) is a constructive ordering, where a_1<n/2, then there exists exactly one constructive ordering (0, b_1, b_2, ...), where b_1 > n/2 which can be mapped to (this doesn't make sense probably) (Prop 2.7)
 	for(int i=1;i<n/2;i++){
 		//add the current value to the list of used values in the ordering
-		processedVals.push_back(i);
+		
 		//since the dagger of the first non-zero element is always itself, push i back to the set of daggers as well
 		daggers.push_back(i);
 		// remove i from the list of unused values so it does not get reused
 		remainingVec.erase(std::remove(remainingVec.begin(),remainingVec.end(),i)); 
 		//calculate the number of constructive orderings that begin with i
-		numOrderings(remainingVec, i, totalOrderings,processedVals,daggers);
+		numOrderings(remainingVec, i, totalOrderings,daggers);
 		//put i back in the rear of the remaining values vector to be reused for potential orderings that do not begin with i
 		remainingVec.push_back(i);
 		//remove i from the list of used values and the list of daggers 
-		processedVals.erase(processedVals.begin());
+	
 		daggers.erase(daggers.begin());
 	}
 	//get the time and calculate the difference in time from start to end
@@ -80,7 +79,7 @@ int main(int argc, const char* argv[]){
 
 }
 
-void numOrderings(std::vector<int> remainingVals, int curTotal, bigValue& totalOrderings, std::vector<int> processedVals, std::vector<int> daggers){
+void numOrderings(std::vector<int> remainingVals, int curTotal, bigValue& totalOrderings, std::vector<int> daggers){
 	//std::cout << "(" << processedVals << ") Beginning of function. " << std::endl;
 	//if there are no more values to add onto the ordering, then all the values have been used and this is a constructive ordering
 	if(remainingVals.size()==0){
@@ -107,14 +106,14 @@ void numOrderings(std::vector<int> remainingVals, int curTotal, bigValue& totalO
 		curTotal %= n;
 		//std::cout << "(" << processedVals << ") curTotal calculated: [" << curTotal << "] Daggers: " << daggers << std::endl;
 		//put the removed value into the list of used values 
-		processedVals.push_back(poppedVal);
+		
 		//if the new total does not already exists in the set of daggers, then this is a possible constructive ordering (Prop 1.4c)
 		if(!(std::find(daggers.begin(),daggers.end(), curTotal)!=daggers.end())){ 
 			//std::cout << "(" << processedVals << ") - invalid branch; curTotal [" << curTotal << "] seen in daggers [" << processedVals << "]" << std::endl;
 			//add the current total to the list of daggers for the next level of the tree
 			daggers.push_back(curTotal);
 			//recursively descend down the next level of the tree
-			numOrderings(remainingVals, curTotal, totalOrderings, processedVals, daggers);
+			numOrderings(remainingVals, curTotal, totalOrderings,  daggers);
 			//remove that total for other "branches" of this "node"
 			daggers.erase(std::remove(daggers.begin(), daggers.end(), curTotal));
 		}
@@ -129,7 +128,7 @@ void numOrderings(std::vector<int> remainingVals, int curTotal, bigValue& totalO
 		//std::cout << "(" << processedVals << ") Reverted curTotal: [" << curTotal << "]" << std::endl;
 
 		//remove the current newest value in ordering for the next pass to create the next possible family of orderings. i.e. if the ordering is currently (1,4,2), remove the 2 so that the ordering becomes (1,4) so in the next loop pass it can become (1,4,3) as opposed to (1,4,2,3)
-		processedVals.erase(std::remove(processedVals.begin(), processedVals.end(), poppedVal));
+		
 		//similarily, re add this value back into the list of remaining values for future use; if the ordering is (1,4,3), then we want to be able to place a 2 somewhere in the future of this ordering.
 		remainingVals.push_back(poppedVal);
 		
