@@ -20,8 +20,13 @@ inline int factorial(int n){
 }
 
 void print_arr(int* arr, int size, FILE* out=stdout){
+	fprintf(out,"0,");
 	for(int i=0;i<size;i++){
-		fprintf(out, "%d, ", arr[i]);
+		if(i!=size-1){
+			fprintf(out, "%d,", arr[i]);
+		}else{
+			fprintf(out, "%d", arr[i]);
+		}
 	}
 	fprintf(out, "\n");
 }
@@ -73,7 +78,11 @@ void subset_identifier(int v){
 		*/
 		int res = verify_permutation(baselist, n);
 		if(res==1){
-			print_arr(baselist,v);
+			std::string name = "../results/constructiveOrderings/" + std::to_string(val) + "orderings.txt";
+			FILE* f = fopen(name.c_str(),"a");
+			print_arr(baselist,n,f);
+			fclose(f);
+			print_arr(baselist,n);
 			valid_subsets++;
 		}
 
@@ -98,8 +107,6 @@ int main(int argc, char const *argv[])
 	end = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds = end-start;
 	cout << "Time: " << elapsed_seconds.count() << endl;
-	FILE* f = popen("echo -ne '\007' > /dev/tty1", "r");
-	pclose(f);
 	return 0;
 }
 
