@@ -1,3 +1,11 @@
+/*
+Copyright 2019 Zackary Baker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include <stdlib.h> //used for atoi
 #include <stdio.h> //used for printf
 #include <unistd.h> //used for sysconf
@@ -43,7 +51,7 @@ struct Thread_Param{
 
 
 /**
-*	The main method of the program. This program calculates the number of constructive orderings on the integers mod n
+*	The main method of the program. This program calculates the number of constructive orderings for the integers mod n
 */
 int main(int argc, char const *argv[])
 {
@@ -83,6 +91,7 @@ int main(int argc, char const *argv[])
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	start = std::chrono::system_clock::now();
 
+	//launch each thread
 	for(int i=0;i<maxThreads;i++){
 		Thread_Param* tp = new Thread_Param(i, n, partitionSize);
 		int threadStatus = pthread_create(&threads[i], NULL, threadProcessorFunc,(void*)tp);
@@ -112,7 +121,7 @@ int main(int argc, char const *argv[])
 }
 
 /**
-*	A simple recursive definition of the factorial function
+*	A simple recursive implementation of the factorial function
 *	INPUT:
 		- n: the value to calculate the factorial of
 	OUTPUT:
@@ -165,17 +174,22 @@ int* lookupOrdering(int n, largeNum orderingIndex){
 		orderingIndex-=factorial(n-1-i)*coefficient;
 	}
 
+	//create a standard vector of size n with values 0 through n-1
 	std::vector<int> orderedList;
 	for(int i=0;i<n;i++){
 		orderedList.push_back(i);
 	}
 	int* ordering = new int[n];
+	//for each element in the sequence
 	for(int i=0;i<n-1;i++){
+		//set each position to the value of the ordered list, indexed by the values in tuple created above, then remove that value to prevent duplicates
 		ordering[i] = orderedList.at(tuple[i]);
 		orderedList.erase(orderedList.begin()+tuple[i]);
 	}
+	//manually add the final value to the ordering.
 	ordering[n-1] = orderedList.front();
 
+	//simply create a new array from the old array of one size smaller to remove the first element
 	int* nl = new int[n-1];
 	for(int i=0;i<n-1;i++){
 		nl[i] = ordering[i+1];
@@ -183,6 +197,7 @@ int* lookupOrdering(int n, largeNum orderingIndex){
 
 	delete [] ordering;
 	delete [] tuple;
+
 	return nl;
 
 
@@ -231,20 +246,22 @@ void* threadProcessorFunc(void* args){
 		returns 1 if ordering is a constructive ordering, and 0 otherwise.
 */
 int verifyOrdering(int* ordering, int n){
-	int total = 0;
-	bool* elementsSeen = new bool[n]();
+
+	int total = 0;// the running total sum
+	bool* elementsSeen = new bool[n](); // an array to keep track of whether each index has been seen previously 
 	for(int i=0;i<n-1;i++){
 		total += ordering[i];
 		total %= n; 
-		if(total==0 || elementsSeen[total]==true || (total==n/2 && i!=n-2)){
+		if(total==0 || elementsSeen[total]==true || (total==n/2 && i!=n-2)){//if the running total is 0 or this total has been seen before or the total is n/2 and is not the final total, return 0 (false)
 			delete [] elementsSeen; 
 			return 0;
 		}
-		else{
+		else{//otherwise indicate that we have seen this total for future passes
 			elementsSeen[total] = true;
 		}
 	}
 
+	//if no total is seen twice, and the other conditions are met, this is a constructive ordering
 	delete [] elementsSeen;
 	return 1;
 }
