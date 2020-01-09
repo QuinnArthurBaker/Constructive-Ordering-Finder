@@ -116,7 +116,7 @@ void* calcFunc(void* args){
 void numOrderings(int id,std::vector<int> remainingVals, int curTotal, bigValue& totalOrderings, std::vector<int> daggers){
 	//std::cout << "(" << processedVals << ") Beginning of function. " << std::endl;
 	//if there are no more values to add onto the ordering, then all the values have been used and this is a constructive ordering
-	if(remainingVals.size()==0){
+	if(remainingVals.empty()){
 		//std::cout << "Valid constructive ordering: " << processedVals << std::endl;
 		totalOrderings++;
 		return;
