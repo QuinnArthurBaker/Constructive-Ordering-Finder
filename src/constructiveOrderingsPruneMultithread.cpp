@@ -49,6 +49,7 @@ int main(int argc, char const *argv[])
 	std::vector<int> remainingVec;
 	std::vector<int> daggers;
 
+	//initialize a vector with the natural ordering
 	for(int i=1;i<n;i++){
 		remainingVec.push_back(i);
 	}
@@ -67,8 +68,10 @@ int main(int argc, char const *argv[])
 	start = std::chrono::system_clock::now();
 
 	for(int i=0;i<numThreads;i++){
+		//add the first value to the vector of daggers 
 		daggers.push_back(i+1);
-		remainingVec.erase(std::remove(remainingVec.begin(),remainingVec.end(), i+1));
+		//remainingVec.erase(std::remove(remainingVec.begin(),remainingVec.end(), i+1));
+		std::erase(remainingVec, i+1);
 		ThreadParam* tp = new ThreadParam(remainingVec, daggers, totalOrderings[i]);
 		int threadStatus = pthread_create(&threads[i], NULL, calcFunc, (void*)tp);
 		if(threadStatus!=0){
@@ -85,8 +88,7 @@ int main(int argc, char const *argv[])
 		//join all the threads
 		void* results = NULL;
 		pthread_join(threads[i], &results);
-		total += (bigValue)(results);
-		
+		total += (bigValue)(results);	
 	}
 
 	end = std::chrono::system_clock::now();
@@ -99,6 +101,11 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
+/* 
+ *	This function parses args as a ThreadParam struct
+ *  and calculates the total number of constructive orderings
+ *  for this struct 
+ */
 void* calcFunc(void* args){
 	ThreadParam* params = (ThreadParam*)(args);
 
@@ -114,7 +121,7 @@ void* calcFunc(void* args){
 }
 
 void numOrderings(int id,std::vector<int> remainingVals, int curTotal, bigValue& totalOrderings, std::vector<int> daggers){
-	//std::cout << "(" << processedVals << ") Beginning of function. " << std::endl;
+	
 	//if there are no more values to add onto the ordering, then all the values have been used and this is a constructive ordering
 	if(remainingVals.empty()){
 		//std::cout << "Valid constructive ordering: " << processedVals << std::endl;
