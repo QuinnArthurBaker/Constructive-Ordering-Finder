@@ -5,6 +5,7 @@ compile:
 	g++ -std=c++17 -o bin/coAdjMatrix src/constructiveOrderingsAdjacencyMatrix.cpp
 	clang++ -std=c++17 -o bin/coPrune src/constructiveOrderingsPruneTree.cpp
 	clang++ -std=c++2a -lpthread -o bin/coPruneMulti src/constructiveOrderingsPruneMultithread.cpp
+	clang++ -std=c++2a -lpthread -o bin/coPrune2Layer src/constructiveOrderingsPruneMultithreadDepth2.cpp
 
 clean:
 	rm bin/*
