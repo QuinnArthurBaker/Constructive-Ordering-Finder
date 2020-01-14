@@ -13,25 +13,27 @@ struct ThreadParam{
 	int id;
 	std::vector<int> remainingVals;
 	std::vector<int> daggers;
+	std::vector<int> prefix;
 	bigValue constructiveOrderings;
-	ThreadParam(int id, std::vector<int> rv, std::vector<int> dagg, bigValue& cos){
+	ThreadParam(int id, std::vector<int> rv, std::vector<int> dagg, bigValue& cos, std::vector<int> prefix){
 		this->remainingVals = rv;
 		//this->id = dagg.front();
 		this->id = id;
 		this->daggers = dagg;
 		this->constructiveOrderings = cos;
+		this->prefix = prefix;
 
 	}
 };
 
 
 static int n;
-static int tuple_size;
 
 std::mutex mu;
 void* calcFunc(void*);
 void numOrderings(int, std::vector<int>, int, bigValue&, std::vector<int>);
 std::vector<int> getStartingDaggers(int,int&);
+std::vector<std::vector<int>> getVectorOfStartingDaggers();
 
 
 int main(int argc, char const *argv[])
@@ -51,7 +53,7 @@ int main(int argc, char const *argv[])
 	printf("n is %d\n",n);
 	
 	//tuple size specifies the number of values in the second non-zero position of the ordering. Naievely, g_2 cannot be 0 or g_1, so there are n-2 potential values for the second position.
-	tuple_size = n-2;
+	// tuple_size = n-2;
 
 	std::vector<int> _remainingVec;
 	std::vector<int> remainingVec;
@@ -63,7 +65,9 @@ int main(int argc, char const *argv[])
 	}
 	remainingVec = _remainingVec;
 	//determine the number of threads to make based on the number of possible ordering starting values. There are ((n/2)-1)(n-2) possible tuples which start a potiential constructive ordering
-	int numThreads = (n/2-1)*tuple_size;
+
+	std::vector<std::vector<int>> vosd = getVectorOfStartingDaggers();
+	int numThreads = vosd.size();
 	printf("Number of threads: %d\n", numThreads);
 	//create an array of totalOrdering counters, one per thread.
 	bigValue* totalOrderings = new bigValue[numThreads]();
@@ -72,7 +76,14 @@ int main(int argc, char const *argv[])
 	pthread_t threads[numThreads];
 
 	//this variable is used to control the tuples generated for each thread. 
-	int preinc = 0;
+	
+	// for(int i=0;i<vosd.size();i++){
+	// 	printf("Dagger %d: ", i);
+	// 	for(int j=0;j<vosd.at(i).size();j++){
+	// 		printf("%d,", vosd.at(i).at(j));
+	// 	}
+	// 	printf("\n");
+	// }
 
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	start = std::chrono::system_clock::now();
@@ -81,11 +92,8 @@ int main(int argc, char const *argv[])
 	for(int i=0;i<numThreads;i++){
 		
 		//reset preinc if the first positions value has changed.
-		if(i%tuple_size==0){
-			preinc = 0;
-		}
 		//create the vector of the first 2 values of the ordering
-		std::vector<int> prefix = getStartingDaggers(i, preinc);
+		std::vector<int> prefix = vosd.at(i);
 		
 		//remove those values from the list of those which will potentially add to the ordering
 		std::erase(remainingVec, prefix.at(0));
@@ -96,7 +104,7 @@ int main(int argc, char const *argv[])
 		std::vector<int> daggers = {prefix.at(0), (prefix.at(0)+prefix.at(1))%n};
 
 		//create the ThreadPararm struct with the preset values
-		ThreadParam* tp = new ThreadParam(i, remainingVec, daggers, totalOrderings[i]);
+		ThreadParam* tp = new ThreadParam(i, remainingVec, daggers, totalOrderings[i], prefix);
 		
 		//create the thread
 		int threadStatus = pthread_create(&threads[i], NULL, calcFunc, (void*)tp);
@@ -133,7 +141,27 @@ int main(int argc, char const *argv[])
 
 /** Function definitions **/
 
-std::vector<int> getStartingDaggers(int index, int& preinc){
+std::vector<std::vector<int>> getVectorOfStartingDaggers(){
+	int div = 1;
+	int mod = 1;
+	std::vector<std::vector<int>> daggers;
+	while(div < n/2){
+		while((mod==div) || ((mod+div)%n == 0) || (mod+div)%n == n/2){
+			mod++;
+		}
+		if(mod>=n){
+			mod = 1;
+			div++;
+			continue;
+		}
+		std::vector<int> tVec = {div,mod};
+		daggers.push_back(tVec);
+		mod++;
+	}
+	return daggers;
+}
+
+/*std::vector<int> getStartingDaggers(int index, int& preinc){
 	std::vector<int> v;
 	int div = index / tuple_size + 1;
 	v.push_back(div);
@@ -144,7 +172,7 @@ std::vector<int> getStartingDaggers(int index, int& preinc){
 	}
 	v.push_back(mod);
 	return v;
-}
+}*/
 /* 
  *	This function parses args as a ThreadParam struct
  *  and calculates the total number of constructive orderings
@@ -156,11 +184,21 @@ void* calcFunc(void* args){
 	int id = params->id;
 	std::vector<int> remainingVals = params->remainingVals;
 	std::vector<int> daggers = params->daggers; 
+	std::vector<int> prefix = params->prefix;
+
 	int curTotal = daggers.back();
 	bigValue ords = 0;
 
-	
 	numOrderings(id, remainingVals, curTotal, ords, daggers);
+	
+	
+	
+	if(ords==0){
+		mu.lock();
+		printf("Thread %d has %lu constructive orderings\n",id, ords);
+		printf("Thread %d prefix: %d, %d\n", id, prefix.at(0), prefix.at(1));
+		mu.unlock();
+	}
 	
 	return (void*)(ords);
 
