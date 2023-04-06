@@ -17,7 +17,7 @@ factorial = "0.3"
 num = {version = "0.2", features = ["rand"] }
 num_cpus = "1.15"
 rand = "0.8.5"
-coz = "0.1"
+#coz = "0.1"
 #[[bin]]
 #name = "cof-si"
 #path = "src/cof-si.rs"
@@ -26,5 +26,5 @@ coz = "0.1"
 name = "cof_benchmark"
 harness = false
 
-[profile.release]
-debug = 1
+#[profile.release]
+#debug = 1
