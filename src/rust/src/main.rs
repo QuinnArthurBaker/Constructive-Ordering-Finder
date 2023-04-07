@@ -10,11 +10,15 @@ struct ThreadResult {
 
 pub fn main() {
     //program constants
-    let n: usize = 12;
+    let n: usize = 14;
     let num_threads: usize = num_cpus::get();
+    let two = BigUint::from(2 as usize);
 
     let partition_size: BigUint = BigUint::from(n - 1);
+    
     let partition_size = (factorial(partition_size)) / num_threads;
+    let partition_size = partition_size / &two;
+    println!("{}", partition_size);
     // Create shared mutable state for the results of each thread
     //let thread_result1 = Arc::new(Mutex::new(ThreadResult { sum: 0 }));
     //let thread_result2 = Arc::new(Mutex::new(ThreadResult { sum: 0 }));
@@ -58,7 +62,7 @@ pub fn main() {
         result_sum = result_sum + tr.sum;
         recv = rx.try_recv();
     }
-
+    result_sum = result_sum * two;
     println!("Total constructive orderings: {}", result_sum);
 }
 
