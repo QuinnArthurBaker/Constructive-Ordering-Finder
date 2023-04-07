@@ -19,15 +19,16 @@ pub fn validate_perm(perm: Vec<usize>) -> usize{
     //         This is where you would apply your function to the permutation
     // println!("Permutation: {:?}", perm);
     let n = perm.len();
-    let mut seen = Vec::new();
+    let mut seen = vec![false;n];
     let mut sum: usize = 0;
     for e in perm {
         sum += e;
         sum = sum % n;
-        if seen.contains(&sum){
+
+        if seen[sum]{
             return 0;
         }
-        seen.push(sum);
+        seen[sum] = true;
     }
     1
     
