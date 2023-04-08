@@ -7,7 +7,7 @@ fn valid_32(){
     for i in 0..32{
         p.push(i);
     }
-    assert_eq!(1, validate_perm(p));
+    assert_eq!(1, validate_perm(&p));
 }
 #[test]
 fn invalid_32(){
@@ -18,7 +18,7 @@ fn invalid_32(){
     p[1] = 2;
     p[2] = 1;
     
-    assert_eq!(0, validate_perm(p));
+    assert_eq!(0, validate_perm(&p));
 }
 
 #[test]
