@@ -1,7 +1,7 @@
 use std::clone;
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
-use cof::{factorial, validate_perm};
+use cof::{factorial, validate_perm, kth_permutation, next_permutation};
 use num::{BigUint, ToPrimitive, pow};
 
 pub fn criterion_benchmark_valid_ordering(c: &mut Criterion){
@@ -10,7 +10,7 @@ pub fn criterion_benchmark_valid_ordering(c: &mut Criterion){
         p.push(i);
     }
     c.bench_function("valid 32", |b| b.iter(||{
-        validate_perm(black_box(p.clone()));
+        validate_perm(black_box(&p));
     }));
 }
 
@@ -22,7 +22,7 @@ pub fn criterion_benchmark_invalid_ordering(c: &mut Criterion){
     p[1] = 2;
     p[2] = 1;
     c.bench_function("invalid 32", |b| b.iter(||{
-        validate_perm(black_box(p.clone()));
+        validate_perm(black_box(&p));
     }));
 }
 
@@ -32,7 +32,7 @@ pub fn criterion_benchmark_valid_ordering_large(c: &mut Criterion){
         p.push(i);
     }
     c.bench_function("valid 1024", |b| b.iter(||{
-        validate_perm(black_box(p.clone()));
+        validate_perm(black_box(&p));
     }));
 
 }
@@ -52,11 +52,22 @@ pub fn criterion_benchmark_fact(c: &mut Criterion){
         });
     }
     group.finish();
+}
 
-    /*c.bench_with_input(BenchmarkId::new("BigUInt Factorial", &input), &input, |b, i| b.iter( || {
-        factorial(i.clone());
+pub fn criterion_benchmark_next_perm(c: &mut Criterion){
+    let k = BigUint::from(0 as usize);
+    let mut p = kth_permutation(1024, k);
+
+    c.bench_function("Next perm 1024", |b| b.iter( || {
+        next_permutation(black_box(&mut p));
     }));
-    */
+      
+}
+
+pub fn criterion_benchmark_kth_perm(c: &mut Criterion){
+    let one = BigUint::from(1 as usize);
+    c.bench_function("kth_perm 1024", |b| b.iter(
+        || {kth_permutation(1024, one.clone())}));
 }
 
 /*
@@ -78,5 +89,5 @@ pub fn criterion_benchmark_kth_perms(c: &mut Criterion){
 }
 */
 //criterion_group!(benches, criterion_benchmark_invalid_ordering);
-criterion_group!(unit_benches, criterion_benchmark_fact, criterion_benchmark_valid_ordering_large, criterion_benchmark_valid_ordering, criterion_benchmark_invalid_ordering);
+criterion_group!(unit_benches, criterion_benchmark_fact, criterion_benchmark_valid_ordering_large, criterion_benchmark_valid_ordering, criterion_benchmark_invalid_ordering, criterion_benchmark_next_perm, criterion_benchmark_kth_perm);
 criterion_main!(unit_benches);
