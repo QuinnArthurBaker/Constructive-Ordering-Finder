@@ -1,0 +1,11 @@
+[package]
+name = "cof_linear"
+version = "0.1.0"
+authors = ["Quinn Baker <quinn@quinnb.ca>"]
+edition = "2018"
+
+[dependencies]
+num = {version = "0.2", features = ["rand"] }
+num_cpus = "1.15"
+rand = "0.8.5"
+cof = {path = "../cof"}

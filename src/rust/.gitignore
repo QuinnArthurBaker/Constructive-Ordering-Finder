@@ -1,4 +1,4 @@
-target/*
-Cargo.lock
-.idea/*
-rust.iml
+*/target/*
+*/Cargo.lock
+*/.idea/*
+*/rust.iml

@@ -1,8 +1,6 @@
-use std::clone;
-
 use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
 use cof::{factorial, validate_perm, kth_permutation, next_permutation};
-use num::{BigUint, ToPrimitive, pow};
+use num::{BigUint, pow};
 
 pub fn criterion_benchmark_valid_ordering(c: &mut Criterion){
     let mut p = Vec::new();
