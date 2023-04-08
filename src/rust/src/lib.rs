@@ -15,7 +15,7 @@ pub fn factorial(input: BigUint) -> BigUint {
     
 }
 
-pub fn validate_perm(perm: Vec<usize>) -> usize{
+pub fn validate_perm(perm: &[usize]) -> usize{
     //         This is where you would apply your function to the permutation
     // println!("Permutation: {:?}", perm);
     let n = perm.len();
@@ -25,9 +25,10 @@ pub fn validate_perm(perm: Vec<usize>) -> usize{
         sum += e;
         sum = sum % n;
 
-        if seen[sum]{
+        if seen[sum] {
             return 0;
         }
+
         seen[sum] = true;
     }
     1
@@ -68,4 +69,34 @@ pub fn kth_permutation(n: usize, mut k: BigUint) -> Vec<usize> {
 
     result 
   
+}
+
+
+/*
+next_permutation courtesy of Project Nayuki
+https://www.nayuki.io/page/next-lexicographical-permutation-algorithm 
+ */
+pub fn next_permutation<T: Ord>(array: &mut [T]) -> bool {
+	// Find non-increasing suffix
+	if array.is_empty() {
+		return false;
+	}
+	let mut i: usize = array.len() - 1;
+	while i > 0 && array[i - 1] >= array[i] {
+		i -= 1;
+	}
+	if i == 0 {
+		return false;
+	}
+	
+	// Find successor to pivot
+	let mut j: usize = array.len() - 1;
+	while array[j] <= array[i - 1] {
+		j -= 1;
+	}
+	array.swap(i - 1, j);
+	
+	// Reverse suffix
+	array[i .. ].reverse();
+	true
 }
