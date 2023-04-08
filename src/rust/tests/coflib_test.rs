@@ -1,5 +1,5 @@
 use cof::{validate_perm, factorial, kth_permutation,next_permutation};
-use num::BigUint;
+use num::{BigUint, FromPrimitive};
 use rand::{SeedableRng, Rng};
 
 #[test]
@@ -28,6 +28,17 @@ fn factorial_10(){
     let ten = BigUint::from(10 as usize);
     let expected = BigUint::from(3628800 as usize);
     assert_eq!(expected, factorial(ten));
+}
+
+#[test]
+fn factorial_base(){
+    let one = BigUint::from(1 as usize);
+    let expected = factorial(one.clone());
+    assert_eq!(one.clone(), expected);
+
+    let zero = BigUint::from_usize(0).unwrap();
+    let expected = factorial(zero.clone());
+    assert_eq!(expected, one.clone());
 }
 
 #[test]
