@@ -1,8 +1,11 @@
-use cof::{factorial, kth_permutation, validate_perm};
+use cof::{factorial, kth_permutation, validate_perm, next_permutation};
 use num::BigUint;
 use std::sync::mpsc;
 use std::thread;
+use std::env;
+use std::process;
 
+#[allow(dead_code)]
 struct ThreadResult {
     id: usize,
     sum: BigUint,
@@ -10,7 +13,12 @@ struct ThreadResult {
 
 pub fn main() {
     //program constants
-    let n: usize = 14;
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2{
+        eprintln!("Missing required command line argument [n]");
+        process::exit(1);
+    }
+    let n: usize = args[1].parse::<usize>().expect("n should be a positive integer");
     let num_threads: usize = num_cpus::get();
     let two = BigUint::from(2 as usize);
 
@@ -18,23 +26,23 @@ pub fn main() {
     
     let partition_size = (factorial(partition_size)) / num_threads;
     let partition_size = partition_size / &two;
-    println!("{}", partition_size);
     // Create shared mutable state for the results of each thread
     //let thread_result1 = Arc::new(Mutex::new(ThreadResult { sum: 0 }));
     //let thread_result2 = Arc::new(Mutex::new(ThreadResult { sum: 0 }));
     let mut threads = Vec::new();
-    println!("(1) Prep complete, readying threads");
     let (tx, rx) = mpsc::channel();
     for threadid in 0..num_threads {
         let this_tx = tx.clone();
-        let mut index: BigUint = &partition_size * threadid;
-        let end_index = &partition_size * (threadid + 1);
+        let index: BigUint = &partition_size * threadid;
+        let end_index = &partition_size * (threadid + 1);  
         let thandle = thread::spawn(move || {
+            let mut p = kth_permutation(n, index.clone());
+            let mut tracker = index.clone();
             let mut ord_count: BigUint = BigUint::from(0 as usize);
-            while index < end_index {
-                let p = kth_permutation(n, index.clone());
-                ord_count += validate_perm(p);
-                index = index + (1 as usize);
+            while tracker < end_index {
+                next_permutation(&mut p);
+                ord_count += validate_perm(&p);
+                tracker = tracker + (1 as usize);
             }
             let thread_result = ThreadResult {
                 id: threadid,
@@ -43,10 +51,8 @@ pub fn main() {
             this_tx.send(thread_result).unwrap();
         });
         threads.push(thandle);
-        println!("Launched thread {}", threadid);
     }
 
-    println!("All threads launched");
     for handle in threads {
         handle.join().unwrap();
     }
@@ -55,10 +61,6 @@ pub fn main() {
     let mut result_sum = BigUint::from(0 as usize);
     while recv.is_ok() {
         let tr = recv.unwrap();
-        println!(
-            "Got {} constructive orderings from thread {}",
-            tr.sum, tr.id
-        );
         result_sum = result_sum + tr.sum;
         recv = rx.try_recv();
     }
