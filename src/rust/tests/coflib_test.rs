@@ -1,5 +1,6 @@
-use cof::{validate_perm, factorial};
+use cof::{validate_perm, factorial, kth_permutation,next_permutation};
 use num::BigUint;
+use rand::{SeedableRng, Rng};
 
 #[test]
 fn valid_32(){
@@ -27,4 +28,24 @@ fn factorial_10(){
     let ten = BigUint::from(10 as usize);
     let expected = BigUint::from(3628800 as usize);
     assert_eq!(expected, factorial(ten));
+}
+
+#[test]
+fn next_permutation_0(){
+    let k = BigUint::from(0 as usize);
+    let mut p = kth_permutation(32, BigUint::from(0 as usize));
+    let expected = kth_permutation(32, BigUint::from(1 as usize));
+    next_permutation(&mut p);
+    assert_eq!(p, expected);
+}
+
+#[test]
+fn next_permutation_rand(){
+    let mut rng = rand::thread_rng();
+    let v: usize = rng.gen();
+    let B = BigUint::from(v as usize);
+    let mut p = kth_permutation(1024, B.clone());
+    let mut expected = kth_permutation(1024, B+(1 as usize));
+    next_permutation(&mut p);
+    assert_eq!(expected, p);
 }
