@@ -2,12 +2,11 @@
 use num::{BigUint, FromPrimitive};
 use std::thread;
 use std::sync::mpsc;
+use cof_tree::N;
 
-const N: usize = 22;
-
-pub fn tree_search(rem: &mut Vec<usize>, daggers: &mut Vec<bool>, current_sum: &mut usize, total: &mut BigUint) -> (){
-    if rem.len() == 0 {
-        *total += 1 as usize;
+pub fn tree_search(rem: &mut Vec<usize>, daggers: &mut Vec<bool>, current_sum: &mut usize, total: &mut BigUint){
+    if rem.is_empty() {
+        *total += 1_usize;
         return;
         //ordering passed, add one to the total number of orderings. 
     }
@@ -19,7 +18,7 @@ pub fn tree_search(rem: &mut Vec<usize>, daggers: &mut Vec<bool>, current_sum: &
     for _i in 0..rem.len(){
         let popped = rem[0];
         rem.retain(|&x|x != popped);
-        let save_sum = current_sum.clone();
+        let save_sum = *current_sum;
         *current_sum += popped;
         *current_sum %= N; 
 
@@ -36,7 +35,6 @@ pub fn tree_search(rem: &mut Vec<usize>, daggers: &mut Vec<bool>, current_sum: &
 
 fn main() {
     println!("Hello, world!");
-    let zero = BigUint::from_usize(0).unwrap();
     //let mut nat = kth_permutation(N, zero.clone());
     let mut rem: Vec<usize> = Vec::new();
     let mut daggers: Vec<bool> = vec![false; N];
@@ -70,7 +68,7 @@ fn main() {
 		handle.join().unwrap();
 	}	
 
-	let mut total = zero.clone();
+	let mut total = BigUint::from_usize(0).unwrap();
 
 	let mut recv = rx.try_recv();
 	while recv.is_ok() {
@@ -79,7 +77,7 @@ fn main() {
 		recv = rx.try_recv();	
 	}
 
-	total = total * BigUint::from_usize(2).unwrap();
+	total *= 2_usize;
 
     println!("Total constructive orderings for N={} - {}", N, total);
 
