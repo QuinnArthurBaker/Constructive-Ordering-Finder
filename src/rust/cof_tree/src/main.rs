@@ -1,7 +1,9 @@
 //use cof::tree_search;
 use num::{BigUint, FromPrimitive};
+use std::thread;
+use std::sync::mpsc;
 
-const N: usize = 18;
+const N: usize = 22;
 
 pub fn tree_search(rem: &mut Vec<usize>, daggers: &mut Vec<bool>, current_sum: &mut usize, total: &mut BigUint) -> (){
     if rem.len() == 0 {
@@ -43,20 +45,43 @@ fn main() {
         rem.push(i);
     }
 
-    let mut total = zero.clone();
+
+    let mut threads = Vec::new();
+    let (tx,rx) = mpsc::channel();
+
     for i in 1..N/2{
-        daggers[i] = true;
-        rem.retain(|&x| x != i);
-        let mut s = i;
-        tree_search(&mut rem, &mut daggers, &mut s, &mut total);
-        rem.push(i);
-		daggers[i] = false;
+		let this_tx = tx.clone();
+		let mut this_daggers = daggers.clone();
+		let mut this_rem = rem.clone();
+		let thandle = thread::spawn(move || {
+			this_daggers[i] = true;
+			this_rem.retain(|&x| x != i);
+			let mut s = i;
+			let mut total = BigUint::from_usize(0).unwrap();
+			tree_search(&mut this_rem, &mut this_daggers, &mut s, &mut total);
+			this_tx.send(total).unwrap();
+		});
+		threads.push(thandle);
+        //rem.push(i);
+		//daggers[i] = false;
     }
+	
+	for handle in threads {
+		handle.join().unwrap();
+	}	
 
-    println!("Total constructive orderings for N={} - {}", N, total*2 as usize);
+	let mut total = zero.clone();
 
+	let mut recv = rx.try_recv();
+	while recv.is_ok() {
+		let result = recv.unwrap();
+		total += result;
+		recv = rx.try_recv();	
+	}
 
+	total = total * BigUint::from_usize(2).unwrap();
 
+    println!("Total constructive orderings for N={} - {}", N, total);
 
 }
 
