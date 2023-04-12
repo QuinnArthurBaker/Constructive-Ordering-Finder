@@ -15,9 +15,11 @@ pub fn tree_search(rem: &mut Vec<usize>, daggers: &mut Vec<bool>, current_sum: &
         return;
     }
 
-    for _i in 0..rem.len(){
+    for _i in 0..rem.len() {
         let popped = rem[0];
-        rem.retain(|&x|x != popped);
+        //drain (remove) the first element of rem. 
+         rem.drain(0..1);
+        //rem.retain(|&x|x != popped);
         let save_sum = *current_sum;
         *current_sum += popped;
         *current_sum %= N; 
